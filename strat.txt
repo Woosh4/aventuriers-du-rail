@@ -1,0 +1,59 @@
+strategies:
+chemin plus court (gagner points cartes, ne pas se faire bloquer)
+certains chemins de 1 ou 2 longueur : goulot d'étranglement 
+chemin long (points par longeurs des chemins, +10 points à la fin)
+bloquer l'autre (chemins la plupart nord/sud, est/ouest, mileux/est-ouest)
+pioche 2 cartes, soit dans le deck, soit parmi 5 deja pretes.
+ne peux prendre que 1 locomotive (joker) sauf si pris dans le deck
+nom de bot alexcouille le destructeur
+liste chainée cartes couleur + objectif, map??, 
+faire liste de tous les objectifs pour prédire ceux de l'autre → pour le bloquer
+
+
+git: faire des commits petit a petit, en anglais
+
+
+fonctions connection : port,nom, puis disconnect
+fonction jouer partie : type de jeu:bot,joueur,tournoi; nbvilles de la carte; nbrails entre 2 villes)
+lire la doc
+
+getmap(int* tracks, t_color faceup[S], t_color cards[4])
+cartes du depart, cartes dans la pioche
+
+getmove(savoir le move de l'adversaire)
+pioche une carte = joue 2 fois
+
+claimroute( ville1,ville2,couleur, nb locomotive)
+placer train entre villes
+
+drawblindcard()
+pioche carte face cachée
+
+drawcard()
+face decouverte
+
+drawobejctives()
+
+chooseobjecties()
+choisir objectifs choisis, pas choisis
+
+printmap()
+affiche le jeu
+
+sendComment
+envoi d'un commentaire pour trashtalk, max 5 messages par tour
+
+struct données:
+
+couleur
+enum : affecte num 0,1,2.. à chaque couleur (ifcouleur==RED) Ok
+
+union
+t_move move;
+if(move.type == CLAIM_ROUTE)
+move.claimRoute.city1
+
+todo
+structures de données map, carte objectifs, carte trains
+joueur basique sans coups illégaux
+joueur stratégique
