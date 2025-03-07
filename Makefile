@@ -5,8 +5,11 @@ aventuriers : aventurier.c
 	gcc -Wall -o aventurier.c aventuriers
 
 clean :
-	rm -f aventurier.o
+	rm -f *.o
 	rm -f aventuriers
 
-go : clean aventuriers
+go : clean all
 	./aventuriers
+
+debug : 
+	gcc -Wall -g -o aventuriers aventurier.c
