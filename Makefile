@@ -22,7 +22,7 @@ go : clean all
 	./dab
 
 debug : clean
-	gcc -c -g -o ticketToRide.o ticketToRide.c
-	gcc -c -g -o codingGameServer.o codingGameServer.c
+	gcc -c -g -o ../TicketToRideAPI/tickettorideapi/ticketToRide.o ../TicketToRideAPI/tickettorideapi/ticketToRide.c
+	gcc -c -g -o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/codingGameServer.c
 	gcc -c -g -o aventurier.o aventurier.c
-	gcc -g -o dab aventurier.o codingGameServer.o ticketToRide.o
+	gcc -g -o dab aventurier.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
