@@ -83,7 +83,7 @@ void print_gamedata(GameData data){
     //print_tab(data.trackData,78*5);
     //print_tab(data.cards,4);
 }
-
+/* permet de jouer avec le terminal avec des scanf*/
 void select_move_manuel(MoveData* mymove){
     ClaimRouteMove claim_route;
 
@@ -115,10 +115,16 @@ void select_move_manuel(MoveData* mymove){
     return;
 }
 
+/* retourne 0 si c'est à moi de jouer, 1 l'autre joueur
+int a_qui(GameData* my_gamedata, MoveData* mymove, MoveData* opponent_move,int* debut){
+    if(*debut){
+        *debut = 0;
+        return my_gamedata->starter;
+    }
+    else{
 
-
-
-
+    }
+}*/
 
 int main(){
     extern int DEBUG_LEVEL;
@@ -142,7 +148,7 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv10");
+    sendName("Alexisv11");
     printf("Name sent.\n");
     sendGameSettings(MySettings, &mygamedata);
     printf("Game settings sent");
