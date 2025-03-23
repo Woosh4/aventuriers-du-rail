@@ -51,7 +51,18 @@ void convert_tab_matrice(route** mat, int* tab, int nbrail){
         mat[tab[i+1]][tab[i]].color = tab[i+3];
         mat[tab[i+1]][tab[i]].color2 = tab[i+4];
     }
+    return 0;
 }
+/* updates the matrix to know wich route has been taken.
+will need move_result to validate*/
+void update_mat(route** mat, MoveData* movedata){
+    if(movedata->action == 1){
+        mat[movedata->claimRoute.to][movedata->claimRoute.from].taken = 1;
+        mat[movedata->claimRoute.from][movedata->claimRoute.to].taken = 1;
+    }
+    return;
+}
+
 /* alloue tableau de int de taille len*/
 int* allouertab(int len){
     int* tab = malloc(len * sizeof(int));
@@ -98,6 +109,21 @@ void select_move_manuel(MoveData* mymove){
         scanf("%d",&mymove->chooseObjectives[1]);
         printf("1 Yes | 0 No\nthird:\n");
         scanf("%d",&mymove->chooseObjectives[2]);
+    }
+    return;
+}
+
+/* besoin inventaire de cartes, autre?*/
+void bot_dumb1(route** mat, MoveData* mymove, int nbcity){
+    for(int i=0; i<nbcity; i++){
+        for(int j=0; j<nbcity; j++){
+            if((mat[i][j].from!=0 || mat[i][j].to!=0) && mat[i][j].taken==0){ // && ... verif assez de cartes
+                mat[i][j].taken = 1;
+                mat[j][i].taken = 1;
+                mymove->action = 1;
+                // ...
+            }
+        }
     }
     return;
 }
@@ -162,6 +188,7 @@ int main(){
     printf("Game settings sent\n");
 
     printf("gamedata.starter = %d\n", mygamedata.starter);
+
     convert_tab_matrice(mat_route,mygamedata.trackData,78);
 
     /* setup pour fonction aqui */
@@ -172,17 +199,21 @@ int main(){
         printBoard();
         
         select_move_manuel(&mymove);
+        update_mat(mat_route,&mymove);
         sendMove(&mymove,&mymoveresult);
         if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
             //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
             select_move_manuel(&mymove);
+            update_mat(mat_route,&mymove);
             sendMove(&mymove,&mymoveresult);
         }
         //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
         getMove(&opponent_move,&opponent_moveresult);
+        update_mat(mat_route,&mymove);
         if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 8){
             //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
             getMove(&opponent_move,&opponent_moveresult);
+            update_mat(mat_route,&mymove);
         }
     }
 
