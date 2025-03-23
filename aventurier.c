@@ -1,33 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ticketToRide.h"
+#include "aventurier.h"
 
-/*GameData* gamedata = {
-    //nom partie
-    "partie Alexis";
-    //game seed
-    1234;
-    // starter 1 ou 2
-    2;
-    //nb cities
-    20;
-    //nb tracks
-    40;
-
-
-};*/
-
-/* alloue un tableau de nbrail * 5 int */
-int** allouer_matricerail(int nbrail){
+/* alloue un tableau de nbrail * 5 int 
+not ok*/
+int** allouer_matrice_route(int nbcity){
     int** tab;
-    tab = malloc(nbrail * sizeof(int*));
+    tab = malloc(nbcity * sizeof(route*));
 
-    for(int i=0;i<nbrail;i++){
-        tab[i] = malloc(5 * sizeof(int));
+    for(int i=0;i<nbcity;i++){
+        tab[i] = malloc(nbcity * sizeof(route));
     }
 return tab;
 }
-/* destroy matrice of size nbrail*5*/
+
+/* destroy matrice of size nbrail*5
+not ok*/
 void destroy_matricerail(int** tab,int nbrail){
     for(int i=0;i<nbrail;i++){
         free(tab[i]);
@@ -35,18 +24,22 @@ void destroy_matricerail(int** tab,int nbrail){
     free(tab);
     return;
 }
-/* print matrice size nbrail*5 */
+
+/* print matrice size nbrail*5 
+not ok*/
 void print_matricerail(int** tab, int nbrail){
     for(int i=0;i<nbrail;i++){
         printf("town 1 :%d ",tab[i][0]);
         printf("town 2 :%d ",tab[i][1]);
-        printf("lenght : %d",tab[i][2]);
+        printf("length : %d",tab[i][2]);
         printf("color 1 : %d",tab[i][3]);
         printf("color 2 : %d\n",tab[i][4]);
     }
     return;
+
 }
-/* fills a matrice size nbrail by 5 with values from an array of size (5*nbrail) */
+/* fills a matrice size nbrail by 5 with values from an array of size (5*nbrail) 
+not ok*/
 void convert_tab_matrice(int** mat, int* tab, int nbrail){
     for(int i=0;i<nbrail*5;i=i+5){
         mat[i][0] = tab[i];
@@ -56,33 +49,24 @@ void convert_tab_matrice(int** mat, int* tab, int nbrail){
         mat[i][4] = tab[i+4];
     }
 }
-
+/* alloue tableau de int de taille len*/
 int* allouertab(int len){
     int* tab = malloc(len * sizeof(int));
     return tab;
 }
-
+/* affiche tableau de int taille len*/
 void print_tab(int* tab, int len){
     for(int i=0;i<len;i++){
         printf("Valeur %d : %d\n",i,tab[i]);
     }
     return;
 }
-
+/* détruit tableau*/
 void destroy_tab(int* tab){
     free(tab);
     return;
 }
 
-void print_gamedata(GameData data){
-    printf("game name : %s\n",data.gameName);
-    printf("game seed : %d\n",data.gameSeed);
-    printf("starter : 0 you, 1 other player : %d\n",data.starter);
-    printf("number of cities : %d\n",data.nbCities);
-    printf("nombre de voies : %d\n",data.nbTracks);
-    //print_tab(data.trackData,78*5);
-    //print_tab(data.cards,4);
-}
 /* permet de jouer avec le terminal avec des scanf*/
 void select_move_manuel(MoveData* mymove){
     ClaimRouteMove claim_route;
@@ -105,33 +89,56 @@ void select_move_manuel(MoveData* mymove){
         scanf("%d",&mymove->drawCard);
     }
     if(mymove->action == 5){
-        printf("draw objectives : which ones ?\n first :");
+        printf("draw objectives : which ones ?\n 1 Yes | 0 No\nfirst :");
         scanf("%d",&mymove->chooseObjectives[0]);
-        printf("second :\n");
+        printf("1 Yes | 0 No\nsecond :\n");
         scanf("%d",&mymove->chooseObjectives[1]);
-        printf("third:\n");
+        printf("1 Yes | 0 No\nthird:\n");
         scanf("%d",&mymove->chooseObjectives[2]);
     }
     return;
 }
 
-/* retourne 0 si c'est à moi de jouer, 1 l'autre joueur
-int a_qui(GameData* my_gamedata, MoveData* mymove, MoveData* opponent_move,int* debut){
-    if(*debut){
-        *debut = 0;
-        return my_gamedata->starter;
+/* retourne 0 si c'est à moi de jouer, 1 l'autre joueur, 2 si partie finie
+quand : 0=j'ai joué avant, 1= autre à joué avant
+useless.. */
+/*
+int a_qui(MoveData* mymove, MoveData* opponent_move,int* quand){
+    printf(" *quand = %d\n", *quand);
+    if(mymove->action == 4){
+        return 0;
     }
-    else{
+    else if(*quand == 1 && (mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9))){
+        *quand = 0;
+        return 0;
+    }
 
+    else if(opponent_move->action == 4){
+        return 1;
     }
+    else if(*quand == 0 && (opponent_move->action == 2 || (opponent_move->action == 3) && opponent_move->drawCard != 9)){
+        *quand = 1;
+        return 1;
+    }
+
+    else if(*quand == 0){
+        *quand = 1;
+        return 1;
+    }
+    else if(*quand == 1){
+        *quand = 0;
+        return 0;
+    }
+    else return -1;
 }*/
 
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;  
     int* envoi;
-    int** mat_rail = allouer_matricerail(78);
+    int** mat_rail = allouer_matrice_route(36);
     int* colors = allouertab(5);
+    int quand;
 
     MoveData mymove;
     MoveData opponent_move;
@@ -148,30 +155,34 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv11");
+    sendName("Alexisv16");
     printf("Name sent.\n");
     sendGameSettings(MySettings, &mygamedata);
     printf("Game settings sent");
 
-    
+    printf("gamedata.starter = %d\n", mygamedata.starter);
+
+    /* setup pour fonction aqui */
+    if(mygamedata.starter == 1) quand = 0;
+    else if (mygamedata.starter == 2) quand = 1;
 
     while(1){
-        //print_gamedata(mygamedata);
         printBoard();
-
-        //mymove.action = scanf("move: CLAIM_ROUTE:1, DRAW_BLIND_CARD:2, DRAW_CARD:3, DRAW_OBJECTIVES:4, CHOOSE_OBJECTIVES:5\n");
         
         select_move_manuel(&mymove);
         sendMove(&mymove,&mymoveresult);
-        if(mymove.action == 4 || mymove.action == 2 || mymove.action == 3){
+        if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
+            //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
             select_move_manuel(&mymove);
             sendMove(&mymove,&mymoveresult);
         }
-    
+        //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
         getMove(&opponent_move,&opponent_moveresult);
-        if(opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) getMove(&opponent_move,&opponent_moveresult);
+        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 8){
+            //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
+            getMove(&opponent_move,&opponent_moveresult);
+        }
     }
-
 
     destroy_matricerail(mat_rail,78);
 

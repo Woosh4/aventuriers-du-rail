@@ -4,7 +4,7 @@
 all  : aventurier.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
 	gcc -o dab aventurier.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
 
-aventurier.o : aventurier.c
+aventurier.o : aventurier.c aventurier.h
 	gcc -c -o aventurier.o aventurier.c
 
 ../TicketToRideAPI/tickettorideapi/codingGameServer.o : ../TicketToRideAPI/tickettorideapi/codingGameServer.c ../TicketToRideAPI/tickettorideapi/codingGameServer.h
