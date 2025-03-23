@@ -3,10 +3,9 @@
 #include "ticketToRide.h"
 #include "aventurier.h"
 
-/* alloue un tableau de nbrail * 5 int 
-not ok*/
-int** allouer_matrice_route(int nbcity){
-    int** tab;
+/* alloue un tableau de nbrail * 5 int */
+route** allouer_matrice_route(int nbcity){
+    route** tab;
     tab = malloc(nbcity * sizeof(route*));
 
     for(int i=0;i<nbcity;i++){
@@ -15,38 +14,42 @@ int** allouer_matrice_route(int nbcity){
 return tab;
 }
 
-/* destroy matrice of size nbrail*5
-not ok*/
-void destroy_matricerail(int** tab,int nbrail){
-    for(int i=0;i<nbrail;i++){
-        free(tab[i]);
+/* destroy matrice of size nbcity*X */
+void destroy_matrice_route(route** mat,int nbcity){
+    for(int i=0;i<nbcity;i++){
+        free(mat[i]);
     }
-    free(tab);
+    free(mat);
     return;
 }
 
-/* print matrice size nbrail*5 
-not ok*/
-void print_matricerail(int** tab, int nbrail){
-    for(int i=0;i<nbrail;i++){
-        printf("town 1 :%d ",tab[i][0]);
-        printf("town 2 :%d ",tab[i][1]);
-        printf("length : %d",tab[i][2]);
-        printf("color 1 : %d",tab[i][3]);
-        printf("color 2 : %d\n",tab[i][4]);
-    }
+/* print matrice sized nbcity*nbcity */
+void print_matrice_route(route** mat, int nbcity){
+    for(int i=0;i<nbcity;i++){
+        printf("[ ");
+        for(int j=0; j<nbcity; j++){
+            printf("(From:%d To:%d lenght:%d taken:%d)  ", (mat[i][j]).from, (mat[i][j]).to, (mat[i][j]).length, (mat[i][j]).taken);
+            }
+            printf("]\n");
+        }
     return;
 
 }
-/* fills a matrice size nbrail by 5 with values from an array of size (5*nbrail) 
-not ok*/
-void convert_tab_matrice(int** mat, int* tab, int nbrail){
+/* converts data from the array to the matrix
+from to length color1 color2 */
+void convert_tab_matrice(route** mat, int* tab, int nbrail){
     for(int i=0;i<nbrail*5;i=i+5){
-        mat[i][0] = tab[i];
-        mat[i][1] = tab[i+1];
-        mat[i][2] = tab[i+2];
-        mat[i][3] = tab[i+3];
-        mat[i][4] = tab[i+4];
+        mat[tab[i]][tab[i+1]].from = tab[i];
+        mat[tab[i]][tab[i+1]].to = tab[i+1];
+        mat[tab[i]][tab[i+1]].length = tab[i+2];
+        mat[tab[i]][tab[i+1]].color = tab[i+3];
+        mat[tab[i]][tab[i+1]].color2 = tab[i+4];
+
+        mat[tab[i+1]][tab[i]].from = tab[i];
+        mat[tab[i+1]][tab[i]].to = tab[i+1];
+        mat[tab[i+1]][tab[i]].length = tab[i+2];
+        mat[tab[i+1]][tab[i]].color = tab[i+3];
+        mat[tab[i+1]][tab[i]].color2 = tab[i+4];
     }
 }
 /* alloue tableau de int de taille len*/
@@ -135,9 +138,7 @@ int a_qui(MoveData* mymove, MoveData* opponent_move,int* quand){
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;  
-    int* envoi;
-    int** mat_rail = allouer_matrice_route(36);
-    int* colors = allouertab(5);
+    int** mat_route = allouer_matrice_route(36);
     int quand;
 
     MoveData mymove;
@@ -155,12 +156,13 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv16");
+    sendName("Alexisv17");
     printf("Name sent.\n");
     sendGameSettings(MySettings, &mygamedata);
-    printf("Game settings sent");
+    printf("Game settings sent\n");
 
     printf("gamedata.starter = %d\n", mygamedata.starter);
+    convert_tab_matrice(mat_route,mygamedata.trackData,78);
 
     /* setup pour fonction aqui */
     if(mygamedata.starter == 1) quand = 0;
@@ -184,7 +186,6 @@ int main(){
         }
     }
 
-    destroy_matricerail(mat_rail,78);
-
+    destroy_matrice_route(mat_route,36);
     return 0;
 }

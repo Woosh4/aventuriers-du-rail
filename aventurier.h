@@ -3,10 +3,10 @@
 typedef struct route_{
     int from;
     int to;
-    int longueur;
+    int length;
     CardColor color;
     CardColor color2;
-    int occupied;
+    int taken;
     // 0 free, 1 player, 2 bot
 
 }route;
