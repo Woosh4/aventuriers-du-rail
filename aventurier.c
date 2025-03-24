@@ -75,6 +75,22 @@ void print_tab(int* tab, int len){
     }
     return;
 }
+/* initialises cards array with starting cards*/
+void init_tab_cards(CardColor* tab, GameData* gamedata){
+    for(int i=0; i<10; i++){
+        tab[i] = 0;
+    }
+
+    for(int i=0; i<4; i++){
+        tab[gamedata->cards[i]] ++;
+    }
+    return;
+}
+void update_tab_cards(CardColor* tab, MoveResult* move_result){
+    printf("move result cards:\n%d", move_result->card);
+    tab[move_result->card] = tab[move_result->card] + 1;
+}
+
 /* détruit tableau*/
 void destroy_tab(int* tab){
     free(tab);
@@ -163,8 +179,11 @@ int a_qui(MoveData* mymove, MoveData* opponent_move,int* quand){
 
 int main(){
     extern int DEBUG_LEVEL;
-    DEBUG_LEVEL = INTERN_DEBUG;  
+    DEBUG_LEVEL = INTERN_DEBUG;
+
     int** mat_route = allouer_matrice_route(36);
+    CardColor* tab_cards = allouertab(10);
+    CardColor* tab_cards_adv = allouertab(10);
     int quand;
 
     MoveData mymove;
@@ -190,6 +209,7 @@ int main(){
     printf("gamedata.starter = %d\n", mygamedata.starter);
 
     convert_tab_matrice(mat_route,mygamedata.trackData,78);
+    init_tab_cards(tab_cards, &mygamedata);
 
     /* setup pour fonction aqui */
     if(mygamedata.starter == 1) quand = 0;
@@ -197,9 +217,12 @@ int main(){
 
     while(1){
         printBoard();
+        print_tab(tab_cards,10);
         
         select_move_manuel(&mymove);
+        printf("update mat\n");
         update_mat(mat_route,&mymove);
+        printf("update tab cards\n");
         sendMove(&mymove,&mymoveresult);
         if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
             //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
@@ -209,14 +232,16 @@ int main(){
         }
         //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
         getMove(&opponent_move,&opponent_moveresult);
-        update_mat(mat_route,&mymove);
+        update_mat(mat_route,&opponent_moveresult);
         if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 8){
             //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
             getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&mymove);
+            update_mat(mat_route,&opponent_moveresult);
         }
     }
 
     destroy_matrice_route(mat_route,36);
+    destroy_tab(tab_cards);
+    destroy_tab(tab_cards_adv);
     return 0;
 }
