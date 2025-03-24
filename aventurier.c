@@ -130,14 +130,36 @@ void select_move_manuel(MoveData* mymove){
 }
 
 /* besoin inventaire de cartes, autre?*/
-void bot_dumb1(route** mat, MoveData* mymove, int nbcity){
+void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* moveresult, int nbcity, int debut){
+    if(debut == 2){
+        mymove->action = 4;
+        sendMove(&mymove, &moveresult);
+        mymove->action = 5;
+        mymove->chooseObjectives[0] = 1;
+        mymove->chooseObjectives[1] = 1;
+        mymove->chooseObjectives[2] = 1;
+        return;
+    }
+
     for(int i=0; i<nbcity; i++){
         for(int j=0; j<nbcity; j++){
-            if((mat[i][j].from!=0 || mat[i][j].to!=0) && mat[i][j].taken==0){ // && ... verif assez de cartes
+            if((mat[i][j].from!=0 ||
+                mat[i][j].to!=0) &&
+                mat[i][j].taken==0 &&
+                mat[i][j].length>0 &&
+                (tab_color[mat[i][j].color] >= mat[i][j].length || tab_color[mat[i][j].color2] >= mat[i][j].length)
+                ){
+
                 mat[i][j].taken = 1;
                 mat[j][i].taken = 1;
+
                 mymove->action = 1;
-                // ...
+                mymove->claimRoute.from = i;
+                mymove->claimRoute.to = j;
+                if(tab_color[mat[i][j].color2] >= mat[i][j].length) mymove->claimRoute.color = mat[i][j].color2;
+                if(tab_color[mat[i][j].color] >= mat[i][j].length) mymove->claimRoute.color = mat[i][j].color;
+                mymove->claimRoute.nbLocomotives = 0;
+                sendMove(&mymove, &moveresult);
             }
         }
     }
@@ -145,37 +167,41 @@ void bot_dumb1(route** mat, MoveData* mymove, int nbcity){
 }
 
 /* retourne 0 si c'est à moi de jouer, 1 l'autre joueur, 2 si partie finie
-quand : 0=j'ai joué avant, 1= autre à joué avant
-useless.. */
-/*
-int a_qui(MoveData* mymove, MoveData* opponent_move,int* quand){
-    printf(" *quand = %d\n", *quand);
-    if(mymove->action == 4){
-        return 0;
-    }
-    else if(*quand == 1 && (mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9))){
-        *quand = 0;
-        return 0;
-    }
+quand : 0: player to play after, 1: bot to play after, 2:start*/
 
-    else if(opponent_move->action == 4){
-        return 1;
+int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* quand){
+    // start of the game
+    printf("*quand = %d\n", *quand);
+    if(*quand == 2){
+        if(mygamedata->starter == 1){
+            *quand = 1;
+            return 1;
+        } 
+        else if(mygamedata->starter == 2){
+            *quand = 0;
+            return 0;
+        }
     }
-    else if(*quand == 0 && (opponent_move->action == 2 || (opponent_move->action == 3) && opponent_move->drawCard != 9)){
+    // play again case
+    if(mymove->action == 4 || mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9)){
         *quand = 1;
-        return 1;
-    }
-
-    else if(*quand == 0){
-        *quand = 1;
-        return 1;
-    }
-    else if(*quand == 1){
-        *quand = 0;
         return 0;
     }
-    else return -1;
-}*/
+    if(opponent_move->action == 4 || opponent_move->action == 2 || (opponent_move->action == 3 && opponent_move->drawCard != 9)){
+        *quand = 0;
+        return 1;
+    }
+    // other's turn to play turn
+    if(*quand == 0){
+        *quand = 1;
+        return 0;
+    }
+    if(*quand == 1){
+        *quand = 0;
+        return 1;
+    }
+    return -1;
+}
 
 int main(){
     extern int DEBUG_LEVEL;
@@ -184,7 +210,7 @@ int main(){
     int** mat_route = allouer_matrice_route(36);
     CardColor* tab_cards = allouertab(10);
     CardColor* tab_cards_adv = allouertab(10);
-    int quand;
+    int quand = 2;
 
     MoveData mymove;
     MoveData opponent_move;
@@ -211,30 +237,27 @@ int main(){
     convert_tab_matrice(mat_route,mygamedata.trackData,78);
     init_tab_cards(tab_cards, &mygamedata);
 
-    /* setup pour fonction aqui */
-    if(mygamedata.starter == 1) quand = 0;
-    else if (mygamedata.starter == 2) quand = 1;
-
     while(1){
         printBoard();
-        print_tab(tab_cards,10);
+        //print_tab(tab_cards,10);
         
+        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
         select_move_manuel(&mymove);
         printf("update mat\n");
         update_mat(mat_route,&mymove);
         printf("update tab cards\n");
         sendMove(&mymove,&mymoveresult);
         if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
-            //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
+            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             select_move_manuel(&mymove);
             update_mat(mat_route,&mymove);
             sendMove(&mymove,&mymoveresult);
         }
-        //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
+        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
         getMove(&opponent_move,&opponent_moveresult);
         update_mat(mat_route,&opponent_moveresult);
-        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 8){
-            //printf("*****\n à qui : %d\n******\n",a_qui(&mymove,&opponent_move,&quand));
+        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
+            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route,&opponent_moveresult);
         }

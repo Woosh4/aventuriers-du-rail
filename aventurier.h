@@ -1,6 +1,6 @@
 #include "ticketToRide.h"
 
-typedef struct route_{
+typedef struct{
     /* supprimer from to, ajouter autres structures board, */
     int from;
     int to;
@@ -15,6 +15,7 @@ typedef struct route_{
 typedef struct{
     int nbcity;
     int nbroute;
+    int* cards_pickable; // cartes à piocher
 }board;
 
 typedef struct{
@@ -22,4 +23,5 @@ typedef struct{
     int nbwagons;
     int nbcards;
     int* cards;
+    int nbobjective;
 }player_info;
