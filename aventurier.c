@@ -237,7 +237,7 @@ int main(){
     GameData mygamedata;
     GameSettings MySettings = GameSettingsDefaults;
     MySettings.gameType = TRAINING;
-    MySettings.starter = 1;
+    MySettings.starter = 0;
     MySettings.reconnect = 0;
 
     printf("init OK\n");
@@ -256,6 +256,16 @@ int main(){
 
     /* jeu bot*/
     while(1){
+        //if other player starts
+        if(quand == 2 && mygamedata.starter == 1){
+            getMove(&opponent_move,&opponent_moveresult);
+            update_mat(mat_route, &opponent_move);
+                if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
+            getMove(&opponent_move,&opponent_moveresult);
+            update_mat(mat_route,&opponent_moveresult);
+            }
+        }
+        //main loop body
         printBoard();
         bot_dumb1(mat_route,&mymove, tab_cards,&mymoveresult,36,&quand);
 
