@@ -119,55 +119,72 @@ void select_move_manuel(MoveData* mymove){
         scanf("%d",&mymove->drawCard);
     }
     if(mymove->action == 5){
-        printf("draw objectives : which ones ?\n 1 Yes | 0 No\nfirst :");
+        printf("draw objectives : which ones ?\nN°1 : 1 Yes | 0 No\n");
         scanf("%d",&mymove->chooseObjectives[0]);
-        printf("1 Yes | 0 No\nsecond :\n");
+        printf("N°2 : 1 Yes | 0 No\n");
         scanf("%d",&mymove->chooseObjectives[1]);
-        printf("1 Yes | 0 No\nthird:\n");
+        printf("N°3 : 1 Yes | 0 No\n");
         scanf("%d",&mymove->chooseObjectives[2]);
     }
     return;
 }
 
 /* besoin inventaire de cartes, autre?*/
-void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* moveresult, int nbcity, int debut){
-    if(debut == 2){
+void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* moveresult, int nbcity, int* debut){
+    if(*debut == 2){
+        *debut = 0;
         mymove->action = 4;
-        sendMove(&mymove, &moveresult);
+        sendMove(mymove, moveresult);
         mymove->action = 5;
         mymove->chooseObjectives[0] = 1;
         mymove->chooseObjectives[1] = 1;
         mymove->chooseObjectives[2] = 1;
+        sendMove(mymove,moveresult);
         return;
     }
 
     for(int i=0; i<nbcity; i++){
         for(int j=0; j<nbcity; j++){
+            // searches if a road can be placed
             if((mat[i][j].from!=0 ||
                 mat[i][j].to!=0) &&
                 mat[i][j].taken==0 &&
                 mat[i][j].length>0 &&
                 (tab_color[mat[i][j].color] >= mat[i][j].length || tab_color[mat[i][j].color2] >= mat[i][j].length)
                 ){
-
+                //place the found road
                 mat[i][j].taken = 1;
                 mat[j][i].taken = 1;
 
                 mymove->action = 1;
                 mymove->claimRoute.from = i;
                 mymove->claimRoute.to = j;
-                if(tab_color[mat[i][j].color2] >= mat[i][j].length) mymove->claimRoute.color = mat[i][j].color2;
-                if(tab_color[mat[i][j].color] >= mat[i][j].length) mymove->claimRoute.color = mat[i][j].color;
+                if(tab_color[mat[i][j].color2] >= mat[i][j].length){
+                     mymove->claimRoute.color = mat[i][j].color2;
+                     tab_color[mat[i][j].color2] -= mat[i][j].length;
+                }
+                if(tab_color[mat[i][j].color] >= mat[i][j].length){
+                    mymove->claimRoute.color = mat[i][j].color;
+                    tab_color[mat[i][j].color] -= mat[i][j].length;
+                }
                 mymove->claimRoute.nbLocomotives = 0;
-                sendMove(&mymove, &moveresult);
+                sendMove(mymove, moveresult);
+                update_mat(mat, mymove);
+                return;
             }
         }
     }
+    //if no road can be placed, pick a random card twice.
+    mymove->action = 2;
+    sendMove(mymove,moveresult);
+    update_tab_cards(tab_color,moveresult);
+    sendMove(mymove,moveresult);
+    update_tab_cards(tab_color,moveresult);
     return;
 }
 
 /* retourne 0 si c'est à moi de jouer, 1 l'autre joueur, 2 si partie finie
-quand : 0: player to play after, 1: bot to play after, 2:start*/
+quand : 0: player to play after, 1: bot to play after, 2:start, 3 player played before, 4 bot played before*/
 
 int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* quand){
     // start of the game
@@ -183,11 +200,11 @@ int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* q
         }
     }
     // play again case
-    if(mymove->action == 4 || mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9)){
+    if((*quand == 0) && (mymove->action == 4 || mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9))){
         *quand = 1;
         return 0;
     }
-    if(opponent_move->action == 4 || opponent_move->action == 2 || (opponent_move->action == 3 && opponent_move->drawCard != 9)){
+    if((*quand == 1) && (opponent_move->action == 4 || opponent_move->action == 2 || (opponent_move->action == 3 && opponent_move->drawCard != 9))){
         *quand = 0;
         return 1;
     }
@@ -227,7 +244,7 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv17");
+    sendName("Alexisv19");
     printf("Name sent.\n");
     sendGameSettings(MySettings, &mygamedata);
     printf("Game settings sent\n");
@@ -237,27 +254,39 @@ int main(){
     convert_tab_matrice(mat_route,mygamedata.trackData,78);
     init_tab_cards(tab_cards, &mygamedata);
 
+    /* jeu bot*/
+    while(1){
+        printBoard();
+        bot_dumb1(mat_route,&mymove, tab_cards,&mymoveresult,36,&quand);
+
+        getMove(&opponent_move,&opponent_moveresult);
+        update_mat(mat_route, &opponent_move);
+        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
+            getMove(&opponent_move,&opponent_moveresult);
+            update_mat(mat_route,&opponent_moveresult);
+        }
+    }
+
+    /* jeu manuel*/
     while(1){
         printBoard();
         //print_tab(tab_cards,10);
         
-        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+        printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
         select_move_manuel(&mymove);
-        printf("update mat\n");
         update_mat(mat_route,&mymove);
-        printf("update tab cards\n");
         sendMove(&mymove,&mymoveresult);
         if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
-            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+            printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             select_move_manuel(&mymove);
             update_mat(mat_route,&mymove);
             sendMove(&mymove,&mymoveresult);
         }
-        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+        printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
         getMove(&opponent_move,&opponent_moveresult);
         update_mat(mat_route,&opponent_moveresult);
         if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
-            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+            printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route,&opponent_moveresult);
         }
