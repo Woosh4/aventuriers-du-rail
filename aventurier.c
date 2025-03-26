@@ -51,7 +51,7 @@ void convert_tab_matrice(route** mat, int* tab, int nbrail){
         mat[tab[i+1]][tab[i]].color = tab[i+3];
         mat[tab[i+1]][tab[i]].color2 = tab[i+4];
     }
-    return 0;
+    return;
 }
 /* updates the matrix to know wich route has been taken.
 will need move_result to validate*/
@@ -64,7 +64,7 @@ void update_mat(route** mat, MoveData* movedata){
 }
 
 /* alloue tableau de int de taille len*/
-int* allouertab(int len){
+void* allouertab(int len){
     int* tab = malloc(len * sizeof(int));
     return tab;
 }
@@ -92,7 +92,7 @@ void update_tab_cards(CardColor* tab, MoveResult* move_result){
 }
 
 /* détruit tableau*/
-void destroy_tab(int* tab){
+void destroy_tab(void* tab){
     free(tab);
     return;
 }
@@ -102,29 +102,29 @@ void select_move_manuel(MoveData* mymove){
     ClaimRouteMove claim_route;
 
     printf("choose action :\n1 | claim route\n2 | draw blind card\n3 | draw card\n4 | draw objectives\n5 | choose objectives\n");
-    scanf("%d",&mymove->action);
+    scanf("%d",(int*)&mymove->action);
     if(mymove->action == 1){
         printf("choose route : from where ?\n");
-        scanf("%d",&claim_route.from);
+        scanf("%d",(int*)&claim_route.from);
         printf("choose route : to where ?\n");
-        scanf("%d",&claim_route.to);
+        scanf("%d",(int*)&claim_route.to);
         printf("choose route : what color ?\n");
-        scanf("%d",&claim_route.color);
+        scanf("%d",(int*)&claim_route.color);
         printf("choose route : nb locomotives ?\n");
-        scanf("%d",&claim_route.nbLocomotives);
+        scanf("%d",(int*)&claim_route.nbLocomotives);
         mymove->claimRoute = claim_route;
     }
     if(mymove->action == 3){
         printf("draw card : what color ?\n");
-        scanf("%d",&mymove->drawCard);
+        scanf("%d",(int*)&mymove->drawCard);
     }
     if(mymove->action == 5){
         printf("draw objectives : which ones ?\nN°1 : 1 Yes | 0 No\n");
-        scanf("%d",&mymove->chooseObjectives[0]);
+        scanf("%d",(int*)&mymove->chooseObjectives[0]);
         printf("N°2 : 1 Yes | 0 No\n");
-        scanf("%d",&mymove->chooseObjectives[1]);
+        scanf("%d",(int*)&mymove->chooseObjectives[1]);
         printf("N°3 : 1 Yes | 0 No\n");
-        scanf("%d",&mymove->chooseObjectives[2]);
+        scanf("%d",(int*)&mymove->chooseObjectives[2]);
     }
     return;
 }
@@ -224,7 +224,7 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
 
-    int** mat_route = allouer_matrice_route(36);
+    route** mat_route = allouer_matrice_route(36);
     CardColor* tab_cards = allouertab(10);
     CardColor* tab_cards_adv = allouertab(10);
     int quand = 2;
@@ -244,7 +244,7 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv19");
+    sendName("Alexisv21");
     printf("Name sent.\n");
     sendGameSettings(MySettings, &mygamedata);
     printf("Game settings sent\n");
@@ -260,9 +260,8 @@ int main(){
         if(quand == 2 && mygamedata.starter == 1){
             getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route, &opponent_move);
-                if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
-            getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&opponent_moveresult);
+            if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){            getMove(&opponent_move,&opponent_moveresult);
+            update_mat(mat_route,&opponent_move);
             }
         }
         //main loop body
@@ -271,9 +270,9 @@ int main(){
 
         getMove(&opponent_move,&opponent_moveresult);
         update_mat(mat_route, &opponent_move);
-        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
+        if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
             getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&opponent_moveresult);
+            update_mat(mat_route,&opponent_move);
         }
     }
 
@@ -286,7 +285,7 @@ int main(){
         select_move_manuel(&mymove);
         update_mat(mat_route,&mymove);
         sendMove(&mymove,&mymoveresult);
-        if((mymove.action == 4 || mymove.action == 2 || mymove.action == 3) && mymove.drawCard != 9  ){
+        if(mymove.action == 4 || mymove.action == 2 || (mymove.action == 3 && mymove.drawCard != 9  )){
             printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             select_move_manuel(&mymove);
             update_mat(mat_route,&mymove);
@@ -294,11 +293,11 @@ int main(){
         }
         printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
         getMove(&opponent_move,&opponent_moveresult);
-        update_mat(mat_route,&opponent_moveresult);
-        if((opponent_move.action == 4 || opponent_move.action == 2 || opponent_move.action == 3) && opponent_move.drawCard != 9){
+        update_mat(mat_route,&opponent_move);
+        if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
             printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
             getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&opponent_moveresult);
+            update_mat(mat_route,&opponent_move);
         }
     }
 
