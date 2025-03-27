@@ -1,11 +1,20 @@
 
-FLAG_DEBUG= -g
+FLAG_DEBUG=
 
-all  : aventurier.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
-	gcc $(FLAG_DEBUG) -o dab aventurier.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
+all  : aventurier.o bot1.o gestion.o manual_play.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
+	gcc $(FLAG_DEBUG) -o dab $^
 
 aventurier.o : aventurier.c aventurier.h
 	gcc -c $(FLAG_DEBUG) -o aventurier.o aventurier.c
+
+gestion.o : gestion.c gestion.h
+	gcc -c $(FLAG_DEBUG) -o gestion.o gestion.c
+
+manual_play.o : manual_play.c manual_play.h
+	gcc -c $(FLAG_DEBUG) -o manual_play.o manual_play.c
+
+bot1.o : bot1.c bot1.h
+	gcc -c $(FLAG_DEBUG) -o bot1.o bot1.c
 
 ../TicketToRideAPI/tickettorideapi/codingGameServer.o : ../TicketToRideAPI/tickettorideapi/codingGameServer.c ../TicketToRideAPI/tickettorideapi/codingGameServer.h
 	gcc -c $(FLAG_DEBUG) -o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/codingGameServer.c
