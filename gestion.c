@@ -35,10 +35,16 @@ void print_matrice_route(route** mat, int nbcity){
 
 }
 
-
 /* converts data from the array to the matrix
 from to length color1 color2 */
-void convert_tab_matrice(route** mat, int* tab, int nbrail){
+void convert_tab_matrice(route** mat, int* tab, int nbrail, int nbcity){
+    for(int j=0; j<nbcity; j++){
+        for(int k=0; k<nbcity; k++){
+            mat[j][k].length = -1;
+            mat[j][k].taken = -1;
+        }
+    }
+
     for(int i=0;i<nbrail*5;i=i+5){
         mat[tab[i]][tab[i+1]].length = tab[i+2];
         mat[tab[i]][tab[i+1]].color = tab[i+3];
@@ -52,10 +58,10 @@ void convert_tab_matrice(route** mat, int* tab, int nbrail){
 }
 /* updates the matrix to know wich route has been taken.
 will need move_result to validate*/
-void update_mat(route** mat, MoveData* movedata){
+void update_mat(route** mat, MoveData* movedata, int player){
     if(movedata->action == 1){
-        mat[movedata->claimRoute.to][movedata->claimRoute.from].taken = 1;
-        mat[movedata->claimRoute.from][movedata->claimRoute.to].taken = 1;
+        mat[movedata->claimRoute.to][movedata->claimRoute.from].taken = player;
+        mat[movedata->claimRoute.from][movedata->claimRoute.to].taken = player;
     }
     return;
 }

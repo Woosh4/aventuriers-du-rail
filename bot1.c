@@ -16,15 +16,13 @@ void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* 
     for(int i=0; i<nbcity; i++){
         for(int j=0; j<nbcity; j++){
             // searches if a road can be placed
-            if((i!=0 ||
-                j!=0) &&
-                mat[i][j].taken==0 &&
-                mat[i][j].length>0 &&
+            if( mat[i][j].taken == -1 &&
+                mat[i][j].length > -1 &&
                 (tab_color[mat[i][j].color] >= mat[i][j].length || tab_color[mat[i][j].color2] >= mat[i][j].length)
                 ){
                 //place the found road
-                mat[i][j].taken = 1;
-                mat[j][i].taken = 1;
+                mat[i][j].taken = 0;
+                mat[j][i].taken = 0;
 
                 mymove->action = 1;
                 mymove->claimRoute.from = i;
@@ -39,7 +37,7 @@ void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* 
                 }
                 mymove->claimRoute.nbLocomotives = 0;
                 sendMove(mymove, moveresult);
-                update_mat(mat, mymove);
+                update_mat(mat, mymove,0);
                 return;
             }
         }

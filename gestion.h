@@ -13,12 +13,12 @@ void destroy_matrice_route(route** mat,int nbcity);
 void print_matrice_route(route** mat, int nbcity);
 
 /* converts data from the array to the matrix
-from to length color1 color2 */
-void convert_tab_matrice(route** mat, int* tab, int nbrail);
+and initialises distance as -1, taken as -1 */
+void convert_tab_matrice(route** mat, int* tab, int nbrail, int nbcity);
 
 /* updates the matrix to know wich route has been taken.
 will need move_result to validate*/
-void update_mat(route** mat, MoveData* movedata);
+void update_mat(route** mat, MoveData* movedata, int player);
 
 /* alloue tableau de int de taille len*/
 void* allouertab(int len);

@@ -8,7 +8,7 @@ typedef struct{
     CardColor color;
     CardColor color2;
     int taken;
-    // 0 free, 1 player, 2 bot
+    // currently 0 free 1 taken, goal -1 free, 0 player 1 bot
 
 }route;
 
