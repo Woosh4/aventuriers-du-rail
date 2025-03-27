@@ -4,7 +4,9 @@
 
 
 /* retourne 0 si c'est à moi de jouer, 1 l'autre joueur, 2 si partie finie
-quand : 0: player to play after, 1: bot to play after, 2:start, 3 player played before, 4 bot played before*/
+quand : 0: player to play after, 1: bot to play after, 2:start, 3 player played before, 4 bot played before
+
+nop faire matrice de machine à état*/
 
 int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* quand){
     // start of the game
@@ -40,7 +42,8 @@ int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* q
     return -1;
 }
 
-
+/* todo : init matrice distance -1, reste init,
+update mat : pour savoir a qui appartient la route*/
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;

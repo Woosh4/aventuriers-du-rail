@@ -27,7 +27,7 @@ void print_matrice_route(route** mat, int nbcity){
     for(int i=0;i<nbcity;i++){
         printf("[ ");
         for(int j=0; j<nbcity; j++){
-            printf("(From:%d To:%d lenght:%d taken:%d)  ", (mat[i][j]).from, (mat[i][j]).to, (mat[i][j]).length, (mat[i][j]).taken);
+            printf("(From:%d To:%d length:%d taken:%d)  ", i, j, (mat[i][j]).length, (mat[i][j]).taken);
             }
             printf("]\n");
         }
@@ -40,14 +40,10 @@ void print_matrice_route(route** mat, int nbcity){
 from to length color1 color2 */
 void convert_tab_matrice(route** mat, int* tab, int nbrail){
     for(int i=0;i<nbrail*5;i=i+5){
-        mat[tab[i]][tab[i+1]].from = tab[i];
-        mat[tab[i]][tab[i+1]].to = tab[i+1];
         mat[tab[i]][tab[i+1]].length = tab[i+2];
         mat[tab[i]][tab[i+1]].color = tab[i+3];
         mat[tab[i]][tab[i+1]].color2 = tab[i+4];
 
-        mat[tab[i+1]][tab[i]].from = tab[i];
-        mat[tab[i+1]][tab[i]].to = tab[i+1];
         mat[tab[i+1]][tab[i]].length = tab[i+2];
         mat[tab[i+1]][tab[i]].color = tab[i+3];
         mat[tab[i+1]][tab[i]].color2 = tab[i+4];

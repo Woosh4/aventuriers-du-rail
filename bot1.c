@@ -16,8 +16,8 @@ void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* 
     for(int i=0; i<nbcity; i++){
         for(int j=0; j<nbcity; j++){
             // searches if a road can be placed
-            if((mat[i][j].from!=0 ||
-                mat[i][j].to!=0) &&
+            if((i!=0 ||
+                j!=0) &&
                 mat[i][j].taken==0 &&
                 mat[i][j].length>0 &&
                 (tab_color[mat[i][j].color] >= mat[i][j].length || tab_color[mat[i][j].color2] >= mat[i][j].length)

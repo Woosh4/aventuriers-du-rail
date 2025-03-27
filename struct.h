@@ -4,9 +4,6 @@
 #define struct_h
 
 typedef struct{
-    /* supprimer from to, ajouter autres structures board, */
-    int from;
-    int to;
     int length;
     CardColor color;
     CardColor color2;
