@@ -129,7 +129,7 @@ void select_move_manuel(MoveData* mymove){
     return;
 }
 
-/* besoin inventaire de cartes, autre?*/
+/* besoin nombre de wagons*/
 void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* moveresult, int nbcity, int* debut){
     if(*debut == 2){
         *debut = 0;
@@ -220,6 +220,54 @@ int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* q
     return -1;
 }
 
+player_info* init_player_info(){
+    player_info* info = malloc(sizeof(player_info*));
+    info->score = 0;
+    info->nbwagons = 45;
+    info->nbcards = 5;
+    info->cards = allouertab(10);
+    info->nbobjective = 0;
+}
+
+void destroy_player_info(player_info* info){
+    free(info->cards);
+    free(info);
+    return;
+}
+/* you NEED to update the route matrix before calling this,
+card array not operational,
+choose objective seems not to be seeable for other players*/
+void update_player_info(player_info* info, MoveData* movedata, MoveResult* moveresult, route** mat_route){
+    // route is built
+    if(movedata->action == 1){
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 1) info->score += 1;
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 2) info->score += 2;
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 3) info->score += 4;
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 4) info->score += 7;
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 5) info->score += 10;
+        if(mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length == 6) info->score += 15;
+        info->nbwagons -= mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length;
+        info->nbcards -= mat_route[movedata->claimRoute.from][movedata->claimRoute.to].length;
+        return;
+    }
+    if(movedata->action == 2){
+        info->nbcards ++;
+        return;
+    }
+    if(movedata->action == 3){
+        info->nbcards++;
+        info->cards[moveresult->card]++;
+        return;
+    }
+    if(movedata->action == 5){
+        for(int i=0; i<3; i++){
+            if(movedata->chooseObjectives[i] == 1) info->nbobjective++;
+        }
+        return;
+    }
+    return;
+}
+
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
@@ -227,6 +275,9 @@ int main(){
     route** mat_route = allouer_matrice_route(36);
     CardColor* tab_cards = allouertab(10);
     CardColor* tab_cards_adv = allouertab(10);
+    player_info* player_info_p1 = init_player_info();
+    player_info* player_info_p2 = init_player_info();
+
     int quand = 2;
 
     MoveData mymove;
@@ -260,8 +311,11 @@ int main(){
         if(quand == 2 && mygamedata.starter == 1){
             getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route, &opponent_move);
-            if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){            getMove(&opponent_move,&opponent_moveresult);
+            update_player_info(player_info_p2, &opponent_move, &opponent_moveresult, mat_route);
+            if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
+            getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route,&opponent_move);
+            update_player_info(player_info_p2, &opponent_move, &opponent_moveresult, mat_route);
             }
         }
         //main loop body
@@ -270,9 +324,11 @@ int main(){
 
         getMove(&opponent_move,&opponent_moveresult);
         update_mat(mat_route, &opponent_move);
+        update_player_info(player_info_p1, &opponent_move, &opponent_moveresult, mat_route);
         if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
             getMove(&opponent_move,&opponent_moveresult);
             update_mat(mat_route,&opponent_move);
+            update_player_info(player_info_p1, &opponent_move, &opponent_moveresult, mat_route);
         }
     }
 
@@ -304,5 +360,7 @@ int main(){
     destroy_matrice_route(mat_route,36);
     destroy_tab(tab_cards);
     destroy_tab(tab_cards_adv);
+    destroy_player_info(player_info_p1);
+    destroy_player_info(player_info_p2);
     return 0;
 }
