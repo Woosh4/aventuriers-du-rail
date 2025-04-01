@@ -1,5 +1,5 @@
 
-FLAG_DEBUG=
+FLAG_DEBUG= -g
 
 all  : aventurier.o bot1.o gestion.o manual_play.o ../TicketToRideAPI/tickettorideapi/codingGameServer.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
 	gcc $(FLAG_DEBUG) -o dab $^

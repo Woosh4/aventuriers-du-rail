@@ -1,33 +1,31 @@
 #include "manual_play.h"
 #include <stdio.h>
 
-void select_move_manuel(MoveData* mymove){
-    ClaimRouteMove claim_route;
+void select_move_manuel(Player_Info* info){
 
     printf("choose action :\n1 | claim route\n2 | draw blind card\n3 | draw card\n4 | draw objectives\n5 | choose objectives\n");
-    scanf("%d",(int*)&mymove->action);
-    if(mymove->action == 1){
+    scanf("%d",(int*)info->movedata->action);
+    if(info->movedata->action == 1){
         printf("choose route : from where ?\n");
-        scanf("%d",(int*)&claim_route.from);
+        scanf("%d",(int*)info->movedata->claimRoute.from);
         printf("choose route : to where ?\n");
-        scanf("%d",(int*)&claim_route.to);
+        scanf("%d",(int*)info->movedata->claimRoute.to);
         printf("choose route : what color ?\n");
-        scanf("%d",(int*)&claim_route.color);
+        scanf("%d",(int*)info->movedata->claimRoute.color);
         printf("choose route : nb locomotives ?\n");
-        scanf("%d",(int*)&claim_route.nbLocomotives);
-        mymove->claimRoute = claim_route;
+        scanf("%d",(int*)info->movedata->claimRoute.nbLocomotives);
     }
-    if(mymove->action == 3){
+    if(info->movedata->action == 3){
         printf("draw card : what color ?\n");
-        scanf("%d",(int*)&mymove->drawCard);
+        scanf("%d",(int*)info->movedata->drawCard);
     }
-    if(mymove->action == 5){
+    if(info->movedata->action == 5){
         printf("draw objectives : which ones ?\nN°1 : 1 Yes | 0 No\n");
-        scanf("%d",(int*)&mymove->chooseObjectives[0]);
+        scanf("%d",(int*)info->movedata->chooseObjectives[0]);
         printf("N°2 : 1 Yes | 0 No\n");
-        scanf("%d",(int*)&mymove->chooseObjectives[1]);
+        scanf("%d",(int*)info->movedata->chooseObjectives[1]);
         printf("N°3 : 1 Yes | 0 No\n");
-        scanf("%d",(int*)&mymove->chooseObjectives[2]);
+        scanf("%d",(int*)info->movedata->chooseObjectives[2]);
     }
     return;
 }

@@ -1,52 +1,52 @@
 #include "bot1.h"
 
-void bot_dumb1(route** mat, MoveData* mymove, CardColor* tab_color, MoveResult* moveresult, int nbcity, int* debut){
-    if(*debut == 2){
-        *debut = 0;
-        mymove->action = 4;
-        sendMove(mymove, moveresult);
-        mymove->action = 5;
-        mymove->chooseObjectives[0] = 1;
-        mymove->chooseObjectives[1] = 1;
-        mymove->chooseObjectives[2] = 1;
-        sendMove(mymove,moveresult);
+/* todo: implement building roads using jokers*/
+void bot_dumb1(Board* bord, Player_Info* info){
+    if(bord->when == -1){
+        bord->when = 0;
+        info->movedata->action = 4;
+        sendMove(info->movedata,info->moveresult);
+        info->movedata->action = 5;
+        info->movedata->chooseObjectives[0] = 1;
+        info->movedata->chooseObjectives[1] = 1;
+        info->movedata->chooseObjectives[2] = 1;
+        sendMove(info->movedata,info->moveresult);
         return;
     }
 
-    for(int i=0; i<nbcity; i++){
-        for(int j=0; j<nbcity; j++){
+    for(int i=0; i<bord->gamedata->nbCities; i++){
+        for(int j=0; j<bord->gamedata->nbCities; j++){
             // searches if a road can be placed
-            if( mat[i][j].taken == -1 &&
-                mat[i][j].length > -1 &&
-                (tab_color[mat[i][j].color] >= mat[i][j].length || tab_color[mat[i][j].color2] >= mat[i][j].length)
+            if( bord->MatRoute[i][j].length > -1 &&
+                bord->MatRoute[i][j].taken == -1 &&         
+                (info->cards[bord->MatRoute[i][j].color] >= bord->MatRoute[i][j].length ||
+                info->cards[bord->MatRoute[i][j].color2] >= bord->MatRoute[i][j].length)
                 ){
                 //place the found road
-                mat[i][j].taken = 0;
-                mat[j][i].taken = 0;
 
-                mymove->action = 1;
-                mymove->claimRoute.from = i;
-                mymove->claimRoute.to = j;
-                if(tab_color[mat[i][j].color2] >= mat[i][j].length){
-                     mymove->claimRoute.color = mat[i][j].color2;
-                     tab_color[mat[i][j].color2] -= mat[i][j].length;
+                info->movedata->action = 1;
+                info->movedata->claimRoute.from = i;
+                info->movedata->claimRoute.to = j;
+                if(info->cards[bord->MatRoute[i][j].color2] >= bord->MatRoute[i][j].length){
+                     info->movedata->claimRoute.color = bord->MatRoute[i][j].color2;
                 }
-                if(tab_color[mat[i][j].color] >= mat[i][j].length){
-                    mymove->claimRoute.color = mat[i][j].color;
-                    tab_color[mat[i][j].color] -= mat[i][j].length;
-                }
-                mymove->claimRoute.nbLocomotives = 0;
-                sendMove(mymove, moveresult);
-                update_mat(mat, mymove,0);
+                if(info->cards[bord->MatRoute[i][j].color] >= bord->MatRoute[i][j].length){
+                    info->movedata->claimRoute.color = bord->MatRoute[i][j].color;
+               }
+                info->movedata->claimRoute.nbLocomotives = 0;
+                sendMove(info->movedata,info->moveresult);
+                update_board(bord, info);
+                update_player_info(info, bord);
+
                 return;
             }
         }
     }
     //if no road can be placed, pick a random card twice.
-    mymove->action = 2;
-    sendMove(mymove,moveresult);
-    update_tab_cards(tab_color,moveresult);
-    sendMove(mymove,moveresult);
-    update_tab_cards(tab_color,moveresult);
+    info->movedata->action = 2;
+    sendMove(info->movedata,info->moveresult);
+    update_player_info(info, bord);
+    sendMove(info->movedata,info->moveresult);
+    update_player_info(info, bord);
     return;
 }

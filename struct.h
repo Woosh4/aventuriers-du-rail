@@ -12,18 +12,26 @@ typedef struct{
 
 }route;
 
+/* updated after getmove, other?*/
 typedef struct{
-    int nbcity;
-    int nbroute;
-    int* cards_pickable; // cartes à piocher
-}board;
+    BoardState* cards_pickable; // cartes à piocher
+    route** MatRoute; // matrix that represents all roads
+    GameData* gamedata;
+    GameSettings gamesettings;
+    int when; // =-1 at the begining, otherwise represents whose turn it is to play
+}Board;
 
+/* updated after board*/
 typedef struct{
+    MoveData* movedata;
+    MoveResult* moveresult;
     int score;
     int nbwagons;
     int nbcards;
-    int* cards;
+    CardColor* cards;
     int nbobjective;
-}player_info;
+    Objective* objective;
+    int player_number;
+}Player_Info;
 
 #endif

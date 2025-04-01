@@ -42,70 +42,67 @@ int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* q
     return -1;
 }
 
-/* todo : init matrice distance -1, reste init,
-update mat : pour savoir a qui appartient la route,
-deplacer les inits pour prendre les vrais nbroute nbcity, faire struct board en conséquent*/
+/* todo : update when, machine à état pour les tours
+problem? : can only update board after move has been done
+needs amount of wagons remaining, for bot1, others
+update all*/
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
 
-    route** mat_route = allouer_matrice_route(36);
-    CardColor* tab_cards = allouertab(10);
-    CardColor* tab_cards_adv = allouertab(10);
-    player_info* player_info_p1 = init_player_info();
-    player_info* player_info_p2 = init_player_info();
+    Board* board = alloc_board();
+    board->gamesettings.gameType = TRAINING;
 
-    int quand = 2;
+    /* alloc info player ?*/
 
-    MoveData mymove;
-    MoveData opponent_move;
-    MoveResult mymoveresult;
-    MoveResult opponent_moveresult;
-
-    GameData mygamedata;
-    GameSettings MySettings = GameSettingsDefaults;
-    MySettings.gameType = TRAINING;
-    MySettings.starter = 0;
-    MySettings.reconnect = 0;
-
-    printf("init OK\n");
+    printf("Allocs OK\n");
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv21");
+    sendName("Alexisv36");
     printf("Name sent.\n");
-    sendGameSettings(MySettings, &mygamedata);
+    sendGameSettings(board->gamesettings, board->gamedata);
     printf("Game settings sent\n");
 
-    printf("gamedata.starter = %d\n", mygamedata.starter);
+    init_board(board);
+    Player_Info* info_p0 = init_player_info(0);
+    Player_Info* info_p1 = init_player_info(1);
 
-    convert_tab_matrice(mat_route,mygamedata.trackData,78,36);
-    init_tab_cards(tab_cards, &mygamedata);
+    print_tab(info_p0->cards, 10);
+    print_matrice_route(board->MatRoute,board->gamedata->nbCities);
+    init_tab_cards(info_p0, board);
+
+
+    printf("init finished");
+
 
     /* jeu bot*/
     while(1){
         //if other player starts
-        if(quand == 2 && mygamedata.starter == 1){
-            getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route, &opponent_move,1);
-            update_player_info(player_info_p2, &opponent_move, &opponent_moveresult, mat_route);
-            if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
-                getMove(&opponent_move,&opponent_moveresult);
-                update_mat(mat_route,&opponent_move, 1);
-                update_player_info(player_info_p2, &opponent_move, &opponent_moveresult, mat_route);
+        if(board->when == -1 && board->gamedata->starter == 1){
+            getMove(info_p1->movedata,info_p1->moveresult);
+            update_board(board, info_p1);
+            update_player_info(info_p1, board);
+            if(info_p1->movedata->action == 4 ||
+            info_p1->movedata->action == 2 ||
+            (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9))
+            {
+                getMove(info_p1->movedata,info_p1->moveresult);
+                update_board(board, info_p1);
+                update_player_info(info_p1, board);
             }
         }
         //main loop body
         printBoard();
-        bot_dumb1(mat_route,&mymove, tab_cards,&mymoveresult,36,&quand);
+        bot_dumb1(board, info_p0);
 
-        getMove(&opponent_move,&opponent_moveresult);
-        update_mat(mat_route, &opponent_move,0);
-        update_player_info(player_info_p1, &opponent_move, &opponent_moveresult, mat_route);
-        if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
-            getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&opponent_move,0);
-            update_player_info(player_info_p1, &opponent_move, &opponent_moveresult, mat_route);
+        getMove(info_p1->movedata, info_p1->moveresult);
+        update_board(board, info_p1);
+        update_player_info(info_p1, board);
+        if(info_p1->movedata->action == 4 || info_p1->movedata->action == 2 || (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9)){
+            getMove(info_p1->movedata, info_p1->moveresult);
+            update_board(board, info_p1);
+            update_player_info(info_p1, board);
         }
     }
 
@@ -114,30 +111,32 @@ int main(){
         printBoard();
         //print_tab(tab_cards,10);
         
-        printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-        select_move_manuel(&mymove);
-        update_mat(mat_route,&mymove,0);
-        sendMove(&mymove,&mymoveresult);
-        if(mymove.action == 4 || mymove.action == 2 || (mymove.action == 3 && mymove.drawCard != 9  )){
-            printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-            select_move_manuel(&mymove);
-            update_mat(mat_route,&mymove,0);
-            sendMove(&mymove,&mymoveresult);
+        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+        select_move_manuel(info_p0);
+        update_board(board, info_p0);
+        update_player_info(info_p0, board);
+        sendMove(info_p0->movedata,info_p0->moveresult);
+        if(info_p0->movedata->action == 4 || info_p0->movedata->action == 2 || (info_p0->movedata->action == 3 && info_p0->movedata->drawCard != 9  )){
+            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+            select_move_manuel(info_p0);
+            update_board(board, info_p0);
+            update_player_info(info_p0, board);
+            sendMove(info_p0->movedata,info_p0->moveresult);
         }
-        printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-        getMove(&opponent_move,&opponent_moveresult);
-        update_mat(mat_route,&opponent_move,1);
-        if(opponent_move.action == 4 || opponent_move.action == 2 || (opponent_move.action == 3 && opponent_move.drawCard != 9)){
-            printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-            getMove(&opponent_move,&opponent_moveresult);
-            update_mat(mat_route,&opponent_move,1);
+        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+        getMove(info_p1->movedata, info_p1->moveresult);
+        update_board(board, info_p1);
+        update_player_info(info_p1, board);
+        if(info_p1->movedata->action == 4 || info_p1->movedata->action == 2 || (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9)){
+            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+            getMove(info_p1->movedata, info_p1->moveresult);
+            update_board(board, info_p1);
+            update_player_info(info_p1, board);
         }
     }
 
-    destroy_matrice_route(mat_route,36);
-    destroy_tab(tab_cards);
-    destroy_tab(tab_cards_adv);
-    destroy_player_info(player_info_p1);
-    destroy_player_info(player_info_p2);
+    destroy_board(board);
+    destroy_player_info(info_p0);
+    destroy_player_info(info_p1);
     return 0;
 }
