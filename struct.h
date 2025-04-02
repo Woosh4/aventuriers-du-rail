@@ -17,7 +17,6 @@ typedef struct{
     BoardState* cards_pickable; // cartes à piocher
     route** MatRoute; // matrix that represents all roads
     GameData* gamedata;
-    GameSettings gamesettings;
     int when; // =-1 at the begining, otherwise represents whose turn it is to play
 }Board;
 

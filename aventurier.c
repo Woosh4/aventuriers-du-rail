@@ -51,31 +51,24 @@ int main(){
     DEBUG_LEVEL = INTERN_DEBUG;
 
     Board* board = alloc_board();
-    board->gamesettings.gameType = TRAINING;
-
-    /* alloc info player ?*/
+    // game settings ??
 
     printf("Allocs OK\n");
 
-    int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
+    // connect v2
+    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv39");
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv39");
-    printf("Name sent.\n");
-    sendGameSettings(board->gamesettings, board->gamedata);
+    sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     printf("Game settings sent\n");
-
+    // Oublie pas de supprimer ton board->gamesettings car plus utilisé
+    // Tu dois changer de branch sur le git : git checkout GC...1 | git pull 
+    // Potentiellment modifier MakeFile car CodeinggameServeur -> clienAPI
+    
     init_board(board);
     Player_Info* info_p0 = init_player_info(0);
     Player_Info* info_p1 = init_player_info(1);
 
     init_tab_cards(info_p0, board);
-    /* connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv39");
-    sendGameSettings("TRAINING NICE_BOT", board->gamedata); // Oublie pas de supprimer ton board->gamesettings car plus utilisé
-    // Tu dois changer de branch sur le git : git checkout GC...1 | git pull 
-    // Potentiellment modifier MakeFile car CodeinggameServeur -> clienAPI
-    
-    */
  
     printf("init finished");
 

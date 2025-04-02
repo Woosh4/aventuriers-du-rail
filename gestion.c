@@ -198,7 +198,6 @@ void update_player_info(Player_Info* info, Board* bord){
 Board* alloc_board(){
     Board* bord = malloc(sizeof(Board));
     bord->cards_pickable = malloc(5*sizeof(CardColor));
-    bord->gamesettings = GameSettingsDefaults;
     bord->gamedata = (GameData*)malloc(sizeof(GameData));
     bord->when = -1;
     return bord;
