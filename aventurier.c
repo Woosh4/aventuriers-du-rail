@@ -59,7 +59,7 @@ int main(){
 
     int connect = connectToCGS("cgs.valentin-lelievre.com", 15001);
     printf("connected? : code %d\n", connect);
-    sendName("Alexisv36");
+    sendName("Alexisv39");
     printf("Name sent.\n");
     sendGameSettings(board->gamesettings, board->gamedata);
     printf("Game settings sent\n");
@@ -68,13 +68,9 @@ int main(){
     Player_Info* info_p0 = init_player_info(0);
     Player_Info* info_p1 = init_player_info(1);
 
-    print_tab(info_p0->cards, 10);
-    print_matrice_route(board->MatRoute,board->gamedata->nbCities);
     init_tab_cards(info_p0, board);
-
-
+ 
     printf("init finished");
-
 
     /* jeu bot*/
     while(1){
@@ -92,6 +88,7 @@ int main(){
                 update_player_info(info_p1, board);
             }
         }
+        
         //main loop body
         printBoard();
         bot_dumb1(board, info_p0);

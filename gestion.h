@@ -39,8 +39,8 @@ Player_Info* init_player_info(int playernumber);
 void destroy_player_info(Player_Info* info);
 
 /* you NEED to update the route matrix before calling this,
-card array not operational,
-choose objective seems not to be seeable for other players*/
+updates all fields except movedata, movedata needs to be the correct one for this turn
+will need updating for jokers */
 void update_player_info(Player_Info* info, Board* bord);
 
 /* alloc board, to be called at the very beginning*/

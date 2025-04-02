@@ -27,7 +27,7 @@ void print_matrice_route(route** mat, int nbcity){
     for(int i=0;i<nbcity;i++){
         printf("[ ");
         for(int j=0; j<nbcity; j++){
-            printf("(From:%d To:%d length:%d Color1: %d taken:%d)  ", i, j, (mat[i][j]).length, mat[i][j].color ,(mat[i][j]).taken);
+            printf("(From:%d To:%d length:%d Color1: %d Color2:%d taken:%d)  ", i, j, (mat[i][j]).length, mat[i][j].color, mat[i][j].color2 ,(mat[i][j]).taken);
             }
             printf("]\n");
         }
@@ -42,6 +42,8 @@ void convert_tab_matrice(Board* bord){
         for(int k=0; k<(bord->gamedata->nbCities); k++){
             bord->MatRoute[j][k].length = -1;
             bord->MatRoute[j][k].taken = -1;
+            bord->MatRoute[j][k].color = -1;
+            bord->MatRoute[j][k].color2 = -1;
         }
     }
 
@@ -100,13 +102,14 @@ void destroy_tab(void* tab){
 
 /* to call whenever*/
 Player_Info* init_player_info(int playernumber){
-    Player_Info* info = malloc(sizeof(Player_Info*));
+    Player_Info* info = malloc(sizeof(Player_Info));
     info->movedata = malloc(sizeof(MoveData));
     info->moveresult = malloc(sizeof(MoveResult));
     info->score = 0;
     info->nbwagons = 45;
     info->nbcards = 5;
     info->cards = malloc(10*sizeof(CardColor));
+    for(int i=0; i<10; i++) info->cards[i] = 0;
     info->nbobjective = 0;
     info->objective = malloc(20*sizeof(Objective));
     info->player_number = playernumber;
@@ -121,7 +124,8 @@ void destroy_player_info(Player_Info* info){
     return;
 }
 /* you NEED to update the route matrix before calling this,
-updates all fields except movedata, movedata needs to be the correct one for this turn*/
+updates all fields except movedata, movedata needs to be the correct one for this turn
+will need updating for jokers */
 void update_player_info(Player_Info* info, Board* bord){
     // route is built
     switch(info->movedata->action){
@@ -154,6 +158,7 @@ void update_player_info(Player_Info* info, Board* bord){
 
         info->nbwagons -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
         info->nbcards -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
+        info->cards[info->movedata->claimRoute.color] -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
         return;
         break;
     
@@ -194,6 +199,7 @@ Board* alloc_board(){
     Board* bord = malloc(sizeof(Board));
     bord->cards_pickable = malloc(5*sizeof(CardColor));
     bord->gamesettings = GameSettingsDefaults;
+    bord->gamedata = (GameData*)malloc(sizeof(GameData));
     bord->when = -1;
     return bord;
 }
@@ -207,6 +213,7 @@ void init_board(Board* bord){
 void destroy_board(Board* bord){
     free(bord->MatRoute);
     free(bord->cards_pickable);
+    free(bord->gamedata);
     free(bord);
 }
 /* updates pickable cards and mat route,
