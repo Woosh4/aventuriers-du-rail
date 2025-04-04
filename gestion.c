@@ -221,3 +221,37 @@ void update_board(Board* bord, Player_Info* info){
     getBoardState(bord->cards_pickable);
     update_mat(bord, info);
 }
+
+int find_min(route* rout, int nbcity){
+    int min = rout[0].weight;
+    int index = 0;
+    for(int i=1; i<nbcity; i++){
+        if(rout[i].weight < min){
+            min = rout[i].weight;
+            index = i;
+        }
+    }
+    return index;
+}
+
+To_Place* shortest(Board* bord, int city1, int city2){
+    To_Place* toplace = malloc(sizeof(To_Place));
+    toplace->city1 = city1;
+    toplace->city2 = city2;
+
+    //init checked
+    int* checked = malloc(bord->gamedata->nbCities * sizeof(int));
+    for(int i=0; i<bord->gamedata->nbCities; i++) checked[i] = 0;
+
+    //init weight
+    for(int j=0; j<bord->gamedata->nbCities; j++){
+        for(int k=0; k<bord->gamedata->nbCities; k++){
+            bord->MatRoute[j][k].weight = __INT_MAX__;
+        }
+    }
+    
+
+
+
+    free(checked);
+}

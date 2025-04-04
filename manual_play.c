@@ -7,13 +7,13 @@ void select_move_manuel(Player_Info* info){
     scanf("%d",(int*)info->movedata->action);
     if(info->movedata->action == 1){
         printf("choose route : from where ?\n");
-        scanf("%d",(int*)info->movedata->claimRoute.from);
+        scanf("%d",&info->movedata->claimRoute.from);
         printf("choose route : to where ?\n");
-        scanf("%d",(int*)info->movedata->claimRoute.to);
+        scanf("%d",&info->movedata->claimRoute.to);
         printf("choose route : what color ?\n");
         scanf("%d",(int*)info->movedata->claimRoute.color);
         printf("choose route : nb locomotives ?\n");
-        scanf("%d",(int*)info->movedata->claimRoute.nbLocomotives);
+        scanf("%d",&info->movedata->claimRoute.nbLocomotives);
     }
     if(info->movedata->action == 3){
         printf("draw card : what color ?\n");

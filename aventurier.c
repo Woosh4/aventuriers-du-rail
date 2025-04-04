@@ -59,6 +59,7 @@ int main(){
     int connect = connectToCGS("82.29.170.160", 15001, "Alexisv39");
     printf("connected? : code %d\n", connect);
     sendGameSettings("TRAINING NICE_BOT", board->gamedata);
+    //sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     printf("Game settings sent\n");
     // Oublie pas de supprimer ton board->gamesettings car plus utilisé
     // Tu dois changer de branch sur le git : git checkout GC...1 | git pull 

@@ -8,7 +8,9 @@ typedef struct{
     CardColor color;
     CardColor color2;
     int taken;
-    // currently 0 free 1 taken, goal -1 free, 0 player 1 bot
+    // currently -1 free 0 taken by player 1 bot
+    int weight;
+    // fo Dijkstra
 
 }route;
 
@@ -33,4 +35,11 @@ typedef struct{
     int player_number;
 }Player_Info;
 
+typedef struct{
+    int city1;
+    int city2;
+    int* path;
+}To_Place;
+
+// tab containing shortest + priority level to track which routes i want to take?
 #endif

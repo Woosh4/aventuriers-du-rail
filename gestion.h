@@ -54,4 +54,9 @@ void destroy_board(Board* bord);
 /* updates pickable cards and mat route*/
 void update_board(Board* bord, Player_Info* info);
 
+/* returns the index of the route with the lowest weight for a given line*/
+int find_min(route* rout, int nbcity);
+
+/* returns the shortest path between city1 and city2*/
+To_Place* shortest(Board* bord, int city1, int city2);
 #endif
