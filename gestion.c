@@ -236,9 +236,17 @@ int find_min(Dijkstra_City* dijk, int nbcity){
 }
 
 /* checks if the array is filled with only 0s*/
-int all_checked(Dijkstra_City* array, int nbcity){
-    for(int i=0; i<nbcity; i++){
-        if(array[i].checked == 0) return 0;
+int all_checked(Dijkstra_City* array, Board* bord){
+    int blocked;
+    for(int i=0; i<bord->gamedata->nbCities; i++){
+        if(array[i].checked == 0){
+            blocked = 1;
+            for(int j=0; j<bord->gamedata->nbCities; j++){
+                if(bord->MatRoute[i][j].taken < 1 && bord->MatRoute[i][j].length > 0) blocked = 0;
+            }
+            if(blocked) array[i].checked = 1;
+            else return 0;
+        }
     }
     return 1;
 }
@@ -279,7 +287,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
 
     //main loop
     // enlever après && pour parcourir tout
-    while(!(all_checked(dijkstra, bord->gamedata->nbCities)) ){//&& dijkstra[city2].checked == 0){
+    while(!(all_checked(dijkstra, bord)) && dijkstra[city2].checked == 0){
         city = find_min(dijkstra, bord->gamedata->nbCities);
         dijkstra[city].checked = 1;
         for(int i=0; i<bord->gamedata->nbCities; i++){

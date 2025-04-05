@@ -58,7 +58,7 @@ void update_board(Board* bord, Player_Info* info);
 int find_min(Dijkstra_City* dijk, int nbcity);
 
 /* checks if the array is filled with only 0s*/
-int all_checked(Dijkstra_City* array, int nbcity);
+int all_checked(Dijkstra_City* array, Board* bord);
 
 /* updates the distance of city2 if the route through city1 is shorter*/
 void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord);
