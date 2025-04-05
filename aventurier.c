@@ -92,6 +92,7 @@ int main(){
         
         //main loop body
         printBoard();
+        shortest(board, 0, 35);
         bot_dumb1(board, info_p0);
 
         getMove(info_p1->movedata, info_p1->moveresult);

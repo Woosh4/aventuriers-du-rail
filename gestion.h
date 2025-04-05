@@ -55,7 +55,13 @@ void destroy_board(Board* bord);
 void update_board(Board* bord, Player_Info* info);
 
 /* returns the index of the route with the lowest weight for a given line*/
-int find_min(route* rout, int nbcity);
+int find_min(Dijkstra_City* dijk, int nbcity);
+
+/* checks if the array is filled with only 0s*/
+int all_checked(Dijkstra_City* array, int nbcity);
+
+/* updates the distance of city2 if the route through city1 is shorter*/
+void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord);
 
 /* returns the shortest path between city1 and city2*/
 To_Place* shortest(Board* bord, int city1, int city2);
