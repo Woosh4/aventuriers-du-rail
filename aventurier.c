@@ -51,27 +51,28 @@ int main(){
     DEBUG_LEVEL = INTERN_DEBUG;
 
     Board* board = alloc_board();
-    // game settings ??
 
     printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv39");
+    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv41");
     printf("connected? : code %d\n", connect);
-    sendGameSettings("TRAINING NICE_BOT", board->gamedata);
-    //sendGameSettings("TRAINING NICE_BOT", board->gamedata);
+    sendGameSettings("TRAINING NICE_BOT map=USA", board->gamedata);
+    //ip 82.29.170.160 web:8889
+    //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
+    //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);
+    //sendGameSettings("TOURNAMENT", board->gamedata);
+    //créer le tournoi sur le web
+    //sendGameSettings("TRAINING NICE_BOT seed=123 start=0 delay=0" map=small, board->gamedata);
     printf("Game settings sent\n");
-    // Oublie pas de supprimer ton board->gamesettings car plus utilisé
-    // Tu dois changer de branch sur le git : git checkout GC...1 | git pull 
-    // Potentiellment modifier MakeFile car CodeinggameServeur -> clienAPI
-    
+
     init_board(board);
     Player_Info* info_p0 = init_player_info(0);
     Player_Info* info_p1 = init_player_info(1);
 
     init_tab_cards(info_p0, board);
  
-    printf("init finished");
+    printf("init OK");
 
     /* jeu bot*/
     while(1){
@@ -92,7 +93,7 @@ int main(){
         
         //main loop body
         printBoard();
-        shortest(board, 0, 30);
+        shortest(board, 0, 33);
         bot_dumb1(board, info_p0);
 
         getMove(info_p1->movedata, info_p1->moveresult);

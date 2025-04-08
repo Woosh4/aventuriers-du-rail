@@ -240,6 +240,7 @@ int all_checked(Dijkstra_City* array, Board* bord){
     int blocked;
     for(int i=0; i<bord->gamedata->nbCities; i++){
         if(array[i].checked == 0){
+            //if a route is surrounded by the opponent and unreachable
             blocked = 1;
             for(int j=0; j<bord->gamedata->nbCities; j++){
                 if(bord->MatRoute[i][j].taken < 1 && bord->MatRoute[i][j].length > 0) blocked = 0;
@@ -256,6 +257,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     //route taken by player
     if(bord->MatRoute[city1][city2].taken == 0){
         if(dijk[city2].weight > dijk[city1].weight) dijk[city2].weight = dijk[city1].weight;
+        if(dijk[city2].prev == -1) dijk[city2].prev = city1;
         return;
     }
     //route taken by opponent
@@ -274,6 +276,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
 To_Place* shortest(Board* bord, int city1, int city2){
     int city;
     To_Place* toplace = malloc(sizeof(To_Place));
+    toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int));
     toplace->city1 = city1;
     toplace->city2 = city2;
 
@@ -282,11 +285,11 @@ To_Place* shortest(Board* bord, int city1, int city2){
     for(int i=0; i<bord->gamedata->nbCities; i++){
          dijkstra[i].checked = 0;
          dijkstra[i].weight = __INT_MAX__;
+         dijkstra[i].prev = -1;
     }
     dijkstra[city1].weight = 0;
 
     //main loop
-    // enlever après && pour parcourir tout
     while(!(all_checked(dijkstra, bord)) && dijkstra[city2].checked == 0){
         city = find_min(dijkstra, bord->gamedata->nbCities);
         dijkstra[city].checked = 1;
@@ -297,7 +300,33 @@ To_Place* shortest(Board* bord, int city1, int city2){
         }
     }
 
+    //build road
+    city = city2;
+    int j = 0;
+    while(city != city1){
+        //fonction find : trouver le min connecté à la branche
+        for(int i=0; i<bord->gamedata->nbCities; i++){
+            if(bord->MatRoute[city][i].length > 0 &&
+                bord->MatRoute[city][i].taken < 1 &&
+                (dijkstra[city].weight == dijkstra[i].weight+bord->MatRoute[city][i].length))
+                {
+                printf("Adding %d to %d to path\n",city,i);
+                toplace->path[j] = city;
+                toplace->path[j+1] = i;
+            }
+        }
+        printf("finished path checking for city %d, path to %d\n",toplace->path[j],toplace->path[j+1]);
+        city = toplace->path[j+1];
+        j = j+2;
+    }
+
+
     // print debug
+    printf("Path =\n");
+    for(int i=0; i<bord->gamedata->nbCities; i=i+2){
+        printf("from: %d, to: %d\n",toplace->path[i],toplace->path[i+1]);
+    }
+
     for(int i=0; i<bord->gamedata->nbCities; i++){
         printf("Tab dijkstra : city:%d checked=%d, weight=%d, prev=%d\n", i, dijkstra[i].checked, dijkstra[i].weight, dijkstra[i].prev);
     }
