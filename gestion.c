@@ -256,8 +256,11 @@ int all_checked(Dijkstra_City* array, Board* bord){
 void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     //route taken by player
     if(bord->MatRoute[city1][city2].taken == 0){
-        if(dijk[city2].weight > dijk[city1].weight) dijk[city2].weight = dijk[city1].weight;
-        if(dijk[city2].prev == -1) dijk[city2].prev = city1;
+        if(dijk[city2].weight > dijk[city1].weight){
+             dijk[city2].weight = dijk[city1].weight;
+            dijk[city2].prev = city1;
+            //if(dijk[city2].prev == -1) dijk[city2].prev = city1;
+        }
         return;
     }
     //route taken by opponent
@@ -265,7 +268,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         return;
     }
     //route is free to take
-    if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
+    else if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
         dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
         dijk[city2].prev = city1;
     }
@@ -299,7 +302,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
             }
         }
     }
-
+    /*
     //build road
     city = city2;
     int j = 0;
@@ -322,10 +325,11 @@ To_Place* shortest(Board* bord, int city1, int city2){
 
 
     // print debug
+    
     printf("Path =\n");
     for(int i=0; i<bord->gamedata->nbCities; i=i+2){
         printf("from: %d, to: %d\n",toplace->path[i],toplace->path[i+1]);
-    }
+    }*/
 
     for(int i=0; i<bord->gamedata->nbCities; i++){
         printf("Tab dijkstra : city:%d checked=%d, weight=%d, prev=%d\n", i, dijkstra[i].checked, dijkstra[i].weight, dijkstra[i].prev);

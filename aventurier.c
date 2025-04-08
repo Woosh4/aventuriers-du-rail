@@ -57,7 +57,7 @@ int main(){
     // connect v2
     int connect = connectToCGS("82.29.170.160", 15001, "Alexisv41");
     printf("connected? : code %d\n", connect);
-    sendGameSettings("TRAINING NICE_BOT map=USA", board->gamedata);
+    sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
     //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);
