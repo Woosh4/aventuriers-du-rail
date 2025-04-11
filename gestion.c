@@ -302,6 +302,8 @@ To_Place* shortest(Board* bord, int city1, int city2){
             }
         }
     }
+    // IMPORTANT: add anti blocked for city 0
+
     /*
     //build road
     city = city2;
