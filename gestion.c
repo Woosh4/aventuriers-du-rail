@@ -113,6 +113,7 @@ Player_Info* init_player_info(int playernumber){
     info->nbobjective = 0;
     info->objective = malloc(20*sizeof(Objective));
     info->player_number = playernumber;
+    return info;
 }
 
 void destroy_player_info(Player_Info* info){
