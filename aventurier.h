@@ -2,3 +2,4 @@
 #include "bot1.h"
 #include "gestion.h"
 #include "manual_play.h"
+#include "bot2.h"

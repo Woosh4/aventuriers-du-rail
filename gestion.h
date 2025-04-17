@@ -66,4 +66,18 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord);
 
 /* returns the shortest path between city1 and city2*/
 To_Place* shortest(Board* bord, int city1, int city2);
+
+void print_toplace(To_Place** toplace);
+
+//TODO
+/* create an array of toplace and fills it using dijkstra*/
+To_Place** To_place_create(Board* bord, Player_Info* info);
+
+/* updates EV on all roads in toplace array*/
+void update_ev(Board* bord, Player_Info* info, To_Place** toplace);
+
+/* searches in To_Place array, with priority, what card color is needed to build the road, -1 if no available, -2 if only joker*/
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace);
+
+void destroy_toplace(To_Place** toplace);
 #endif

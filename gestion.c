@@ -323,17 +323,56 @@ To_Place* shortest(Board* bord, int city1, int city2){
     }
 
     //debug : print found weight, checked, and prev for each city (with weight < to city2's)
-    for(int i=0; i<bord->gamedata->nbCities; i++){
-        printf("Tab dijkstra : city:%d checked=%d, weight=%d, prev=%d\n", i, dijkstra[i].checked, dijkstra[i].weight, dijkstra[i].prev);
-    }
+    // for(int i=0; i<bord->gamedata->nbCities; i++){
+    //     printf("Tab dijkstra : city:%d checked=%d, weight=%d, prev=%d\n", i, dijkstra[i].checked, dijkstra[i].weight, dijkstra[i].prev);
+    // }
 
     //debug : print the path found
-    i = 0;
-    printf("----------\nPATH FOUND DEBUG:\n----------\nConnecting %d to %d\n", city1, city2);
-    while(toplace->path[i+1] != city1){
-        printf("from %d to %d\n", toplace->path[i], toplace->path[i+1]);
-        i = i+2;
-    }
+    // i = 0;
+    // printf("----------\nPATH FOUND DEBUG:\n----------\nConnecting %d to %d\n", city1, city2);
+    // while(toplace->path[i+1] != city1){
+    //     printf("from %d to %d\n", toplace->path[i], toplace->path[i+1]);
+    //     i = i+2;
+    // }
     
     free(dijkstra);
 }
+
+void print_toplace(To_Place** toplace){
+    int j;
+    printf("----------\nDEBUG: PRINT TOPLACE\n----------\n");
+    for(int i=0; i<10; i++){
+        j = 0;
+        if(toplace[i] != NULL){ // check if toplace[i] is null
+        printf("FROM: %d TO: %d NBWAGONS: %d EV: %d PRIORITY: %d\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev, toplace[i]->priority);
+            while(toplace[i]->path[j+1] != toplace[i]->city1){
+                printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
+                j = j+2;
+            }
+        }
+        printf("\n");
+    }
+    printf("----------\n");
+}
+
+/////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! change malloc size : not 10, nbobjectives? also change for print,destroy?, in bot2?....
+To_Place** To_place_create(Board* bord, Player_Info* info){
+    To_Place** toplace = malloc(10 * sizeof(To_Place*));
+    //add objective roads
+    for(int i=0; i<info->nbobjective; i++){
+        toplace[i] = shortest(bord, info->objective[i].from, info->objective[i].to);
+        toplace[i]->ev = info->objective[i].score / toplace[i]->nbwagons;
+    }
+    //add empty to fill up
+    for(int i=info->nbobjective; i<10; i++){
+        toplace[i] = NULL;
+    }
+    return toplace;
+}
+
+void update_ev(Board* bord, Player_Info* info, To_Place** toplace){
+
+}
+
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace){}
+

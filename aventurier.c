@@ -55,7 +55,7 @@ int main(){
     printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv41");
+    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv43");
     printf("connected? : code %d\n", connect);
     sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889
@@ -93,8 +93,8 @@ int main(){
         
         //main loop body
         printBoard();
-        shortest(board, 0, 30);
         bot_dumb1(board, info_p0);
+        bot_2(board, info_p0);
         if(info_p0->moveresult->state) break;
 
         getMove(info_p1->movedata, info_p1->moveresult);

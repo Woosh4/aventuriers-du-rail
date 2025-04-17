@@ -11,6 +11,7 @@ void bot_dumb1(Board* bord, Player_Info* info){
         info->movedata->chooseObjectives[1] = 1;
         info->movedata->chooseObjectives[2] = 1;
         sendMove(info->movedata,info->moveresult);
+        update_player_info(info, bord);
         return;
     }
 
