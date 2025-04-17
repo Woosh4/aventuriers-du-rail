@@ -37,6 +37,7 @@ typedef struct{
     int city1;
     int city2;
     int priority;
+    int nbwagons;
     int* path;
     // path : [city1, city2, city2, city3]= road from 1→2 then 2→3
 }To_Place;

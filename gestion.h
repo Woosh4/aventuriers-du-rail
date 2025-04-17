@@ -51,7 +51,8 @@ void init_board(Board* bord);
 
 void destroy_board(Board* bord);
 
-/* updates pickable cards and mat route*/
+/* updates pickable cards, and mat route using the move data in info.
+update 'when' with a function ?*/
 void update_board(Board* bord, Player_Info* info);
 
 /* returns the index of the route with the lowest weight for a given line*/

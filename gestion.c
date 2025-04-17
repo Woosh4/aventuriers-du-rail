@@ -216,7 +216,7 @@ void destroy_board(Board* bord){
     free(bord->gamedata);
     free(bord);
 }
-/* updates pickable cards and mat route,
+/* updates pickable cards, and mat route using the move data in info.
 update 'when' with a function ?*/
 void update_board(Board* bord, Player_Info* info){
     getBoardState(bord->cards_pickable);
@@ -285,6 +285,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
     toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
     toplace->city1 = city1;
     toplace->city2 = city2;
+    toplace->nbwagons = 0;
 
     //init checked + weight
     Dijkstra_City* dijkstra = malloc(bord->gamedata->nbCities * sizeof(Dijkstra_City));
@@ -311,6 +312,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
     //build the full road (from city2 to city1)
     city = city2;
     int i=0;
+    toplace->nbwagons = dijkstra[city2].weight;
     while(dijkstra[city].prev != -1){
         if(bord->MatRoute[city][dijkstra[city].prev].taken == -1){ //only add unconnected cities
             toplace->path[i] = city;

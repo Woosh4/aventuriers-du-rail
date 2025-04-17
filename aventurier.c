@@ -95,45 +95,48 @@ int main(){
         printBoard();
         shortest(board, 0, 30);
         bot_dumb1(board, info_p0);
+        if(info_p0->moveresult->state) break;
 
         getMove(info_p1->movedata, info_p1->moveresult);
+        if(info_p1->moveresult->state) break;
         update_board(board, info_p1);
         update_player_info(info_p1, board);
         if(info_p1->movedata->action == 4 || info_p1->movedata->action == 2 || (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9)){
             getMove(info_p1->movedata, info_p1->moveresult);
+            if(info_p1->moveresult->state) break;
             update_board(board, info_p1);
             update_player_info(info_p1, board);
         }
     }
 
     /* jeu manuel*/
-    while(1){
-        printBoard();
-        //print_tab(tab_cards,10);
+    // while(1){
+    //     printBoard();
+    //     //print_tab(tab_cards,10);
         
-        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-        select_move_manuel(info_p0);
-        update_board(board, info_p0);
-        update_player_info(info_p0, board);
-        sendMove(info_p0->movedata,info_p0->moveresult);
-        if(info_p0->movedata->action == 4 || info_p0->movedata->action == 2 || (info_p0->movedata->action == 3 && info_p0->movedata->drawCard != 9  )){
-            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-            select_move_manuel(info_p0);
-            update_board(board, info_p0);
-            update_player_info(info_p0, board);
-            sendMove(info_p0->movedata,info_p0->moveresult);
-        }
-        //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-        getMove(info_p1->movedata, info_p1->moveresult);
-        update_board(board, info_p1);
-        update_player_info(info_p1, board);
-        if(info_p1->movedata->action == 4 || info_p1->movedata->action == 2 || (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9)){
-            //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
-            getMove(info_p1->movedata, info_p1->moveresult);
-            update_board(board, info_p1);
-            update_player_info(info_p1, board);
-        }
-    }
+    //     //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+    //     select_move_manuel(info_p0);
+    //     update_board(board, info_p0);
+    //     update_player_info(info_p0, board);
+    //     sendMove(info_p0->movedata,info_p0->moveresult);
+    //     if(info_p0->movedata->action == 4 || info_p0->movedata->action == 2 || (info_p0->movedata->action == 3 && info_p0->movedata->drawCard != 9  )){
+    //         //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+    //         select_move_manuel(info_p0);
+    //         update_board(board, info_p0);
+    //         update_player_info(info_p0, board);
+    //         sendMove(info_p0->movedata,info_p0->moveresult);
+    //     }
+    //     //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+    //     getMove(info_p1->movedata, info_p1->moveresult);
+    //     update_board(board, info_p1);
+    //     update_player_info(info_p1, board);
+    //     if(info_p1->movedata->action == 4 || info_p1->movedata->action == 2 || (info_p1->movedata->action == 3 && info_p1->movedata->drawCard != 9)){
+    //         //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+    //         getMove(info_p1->movedata, info_p1->moveresult);
+    //         update_board(board, info_p1);
+    //         update_player_info(info_p1, board);
+    //     }
+    // }
 
     destroy_board(board);
     destroy_player_info(info_p0);
