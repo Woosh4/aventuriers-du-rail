@@ -1,7 +1,7 @@
 
 FLAG_DEBUG= -g
 
-all  : aventurier.o bot1.o gestion.o manual_play.o ../TicketToRideAPI/tickettorideapi/clientAPI.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
+all  : aventurier.o bot1.o bot2.o gestion.o manual_play.o ../TicketToRideAPI/tickettorideapi/clientAPI.o ../TicketToRideAPI/tickettorideapi/ticketToRide.o
 	gcc $(FLAG_DEBUG) -o dab $^
 
 aventurier.o : aventurier.c aventurier.h
@@ -15,6 +15,9 @@ manual_play.o : manual_play.c manual_play.h
 
 bot1.o : bot1.c bot1.h
 	gcc -c $(FLAG_DEBUG) -o bot1.o bot1.c
+
+bot2.o : bot2.c bot2.h
+	gcc -c $(FLAG_DEBUG) -o bot2.o bot2.c
 
 ../TicketToRideAPI/tickettorideapi/clientAPI.o : ../TicketToRideAPI/tickettorideapi/clientAPI.c ../TicketToRideAPI/tickettorideapi/clientAPI.h
 	gcc -c $(FLAG_DEBUG) -o ../TicketToRideAPI/tickettorideapi/clientAPI.o ../TicketToRideAPI/tickettorideapi/clientAPI.c

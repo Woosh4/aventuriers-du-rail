@@ -276,11 +276,13 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     return;
 }
 
-/* dikstra to find the shortest path between city1 and city2*/
+/* dikstra to find the shortest path between city1 and city2
+// IMPORTANT: add anti blocked for city 0 (of origin?)
+add how many roads are needed ? (for speed, optimising toplace* malloc space, building of the full road)*/
 To_Place* shortest(Board* bord, int city1, int city2){
     int city;
     To_Place* toplace = malloc(sizeof(To_Place));
-    toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int));
+    toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
     toplace->city1 = city1;
     toplace->city2 = city2;
 
@@ -303,39 +305,33 @@ To_Place* shortest(Board* bord, int city1, int city2){
             }
         }
     }
-    // IMPORTANT: add anti blocked for city 0
+    // IMPORTANT: add anti blocked for city n°0 (of origin?)
+    // detect if weight of city2(destination) = -1
 
-    /*
-    //build road
+    //build the full road (from city2 to city1)
     city = city2;
-    int j = 0;
-    while(city != city1){
-        //fonction find : trouver le min connecté à la branche
-        for(int i=0; i<bord->gamedata->nbCities; i++){
-            if(bord->MatRoute[city][i].length > 0 &&
-                bord->MatRoute[city][i].taken < 1 &&
-                (dijkstra[city].weight == dijkstra[i].weight+bord->MatRoute[city][i].length))
-                {
-                printf("Adding %d to %d to path\n",city,i);
-                toplace->path[j] = city;
-                toplace->path[j+1] = i;
-            }
+    int i=0;
+    while(dijkstra[city].prev != -1){
+        if(bord->MatRoute[city][dijkstra[city].prev].taken == -1){ //only add unconnected cities
+            toplace->path[i] = city;
+            toplace->path[i+1] = dijkstra[city].prev;
+            i = i+2;
         }
-        printf("finished path checking for city %d, path to %d\n",toplace->path[j],toplace->path[j+1]);
-        city = toplace->path[j+1];
-        j = j+2;
+        city = dijkstra[city].prev;
     }
 
-
-    // print debug
-    
-    printf("Path =\n");
-    for(int i=0; i<bord->gamedata->nbCities; i=i+2){
-        printf("from: %d, to: %d\n",toplace->path[i],toplace->path[i+1]);
-    }*/
-
+    //debug : print found weight, checked, and prev for each city (with weight < to city2's)
     for(int i=0; i<bord->gamedata->nbCities; i++){
         printf("Tab dijkstra : city:%d checked=%d, weight=%d, prev=%d\n", i, dijkstra[i].checked, dijkstra[i].weight, dijkstra[i].prev);
     }
+
+    //debug : print the path found
+    i = 0;
+    printf("----------\nPATH FOUND DEBUG:\n----------\nConnecting %d to %d\n", city1, city2);
+    while(toplace->path[i+1] != city1){
+        printf("from %d to %d\n", toplace->path[i], toplace->path[i+1]);
+        i = i+2;
+    }
+    
     free(dijkstra);
 }
