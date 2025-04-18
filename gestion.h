@@ -69,15 +69,19 @@ To_Place* shortest(Board* bord, int city1, int city2);
 
 void print_toplace(To_Place** toplace);
 
-//TODO
-/* create an array of toplace and fills it using dijkstra*/
+/* create an array of toplace and fills it using dijkstra, also fills EV*/
 To_Place** To_place_create(Board* bord, Player_Info* info);
 
-/* updates EV on all roads in toplace array*/
-void update_ev(Board* bord, Player_Info* info, To_Place** toplace);
+//TODO
 
-/* searches in To_Place array, with priority, what card color is needed to build the road, -1 if no available, -2 if only joker*/
+/* searches in To_Place array, with EV, what card color is needed to build the road,
+(taking into account how many cards are in hand)
+-1 if no card available(pick random?), -2 if only joker, -3 if any color
+skip road if any color can be used, then comes back later: */
 int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace);
+
+/*finds maximum EV in the toplace array and returns its position, returns -1 if error*/
+int find_max_ev(To_Place** toplace);
 
 void destroy_toplace(To_Place** toplace);
 #endif

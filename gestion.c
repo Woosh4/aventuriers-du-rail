@@ -377,9 +377,37 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
     return toplace;
 }
 
-void update_ev(Board* bord, Player_Info* info, To_Place** toplace){
-
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace){
+    //Find maximum EV
+    
+    return ;
 }
 
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace){}
+int find_max_ev(To_Place** toplace){
+    int max = -1;
+    int i = -1;
+    for(int j=0; j<10; j++){ // 10 toplace in the array
+        if(toplace[j] != NULL){
+            if(toplace[j]->ev > max){
+                max = toplace[j]->ev;
+                i = j;
+            }
+        }
+    }
+    if(max == -1){
+        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA\nERROR IN find_max_ev : MAX EV NOT FOUND\n");
+        return -1;
+    }
+    return i;
+}
 
+/*OK it seems ?*/
+void destroy_toplace(To_Place** toplace){
+    for(int i=0; i<10; i++){ // 10 toplace in the array
+        if(toplace[i] != NULL){
+            free(toplace[i]->path);
+            free(toplace[i]);
+        }
+    }
+    free(toplace);
+}
