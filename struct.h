@@ -29,7 +29,7 @@ typedef struct{
     int nbcards;
     CardColor* cards;
     int nbobjective;
-    Objective* objective;
+    Objective** objective;
     int player_number;
 }Player_Info;
 

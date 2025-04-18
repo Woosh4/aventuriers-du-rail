@@ -26,7 +26,7 @@ void bot_2(Board* bord, Player_Info* info){
 
     //cleanup
     for(int i=0; i<10; i++){
-        if(toplace[i != NULL]){
+        if(toplace[i] != NULL){
             free(toplace[i]->path);
             free(toplace[i]);
         }

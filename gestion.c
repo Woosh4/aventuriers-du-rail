@@ -111,7 +111,8 @@ Player_Info* init_player_info(int playernumber){
     info->cards = malloc(10*sizeof(CardColor));
     for(int i=0; i<10; i++) info->cards[i] = 0;
     info->nbobjective = 0;
-    info->objective = malloc(20*sizeof(Objective));
+    info->objective = malloc(20*sizeof(Objective*));
+    for(int i=0; i<20; i++) info->objective[i] = malloc(sizeof(Objective));
     info->player_number = playernumber;
     return info;
 }
@@ -120,6 +121,7 @@ void destroy_player_info(Player_Info* info){
     free(info->cards);
     free(info->movedata);
     free(info->moveresult);
+    for(int i=0; i<20; i++) free(info->objective[i]); // problem?
     free(info->objective);
     free(info);
     return;
@@ -182,12 +184,12 @@ void update_player_info(Player_Info* info, Board* bord){
     case 5:
         for(int i=0; i<3; i++){
             if(info->movedata->chooseObjectives[i] == 1){
-                info->nbobjective++;
                 if(info->player_number == 0){
-                    info->objective[info->nbobjective].from = info->moveresult->objectives[i].from;
-                    info->objective[info->nbobjective].to = info->moveresult->objectives[i].to;
-                    info->objective[info->nbobjective].score = info->moveresult->objectives[i].score;
+                    info->objective[info->nbobjective]->from = info->moveresult->objectives[i].from;
+                    info->objective[info->nbobjective]->to = info->moveresult->objectives[i].to;
+                    info->objective[info->nbobjective]->score = info->moveresult->objectives[i].score;
                 }
+                info->nbobjective++;
             }
         }
         return;
@@ -321,6 +323,8 @@ To_Place* shortest(Board* bord, int city1, int city2){
         }
         city = dijkstra[city].prev;
     }
+    toplace->path[i] = -1;
+    toplace->path[i+1] = -1;
 
     //debug : print found weight, checked, and prev for each city (with weight < to city2's)
     // for(int i=0; i<bord->gamedata->nbCities; i++){
@@ -336,6 +340,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
     // }
     
     free(dijkstra);
+    return toplace;
 }
 
 void print_toplace(To_Place** toplace){
@@ -344,10 +349,13 @@ void print_toplace(To_Place** toplace){
     for(int i=0; i<10; i++){
         j = 0;
         if(toplace[i] != NULL){ // check if toplace[i] is null
-        printf("FROM: %d TO: %d NBWAGONS: %d EV: %d PRIORITY: %d\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev, toplace[i]->priority);
-            while(toplace[i]->path[j+1] != toplace[i]->city1){
-                printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
-                j = j+2;
+        printf("FROM: %d TO: %d NBWAGONS: %d EV: %f PRIORITY: %d\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev, toplace[i]->priority);
+            if(toplace[i]->path != NULL){
+                while(toplace[i]->path[j+1] != -1){
+                    printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
+                    j = j+2;
+                }
+                // printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
             }
         }
         printf("\n");
@@ -355,13 +363,12 @@ void print_toplace(To_Place** toplace){
     printf("----------\n");
 }
 
-/////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! change malloc size : not 10, nbobjectives? also change for print,destroy?, in bot2?....
 To_Place** To_place_create(Board* bord, Player_Info* info){
     To_Place** toplace = malloc(10 * sizeof(To_Place*));
     //add objective roads
     for(int i=0; i<info->nbobjective; i++){
-        toplace[i] = shortest(bord, info->objective[i].from, info->objective[i].to);
-        toplace[i]->ev = info->objective[i].score / toplace[i]->nbwagons;
+        toplace[i] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
+        toplace[i]->ev = (float)(info->objective[i]->score) / (float)(toplace[i]->nbwagons);
     }
     //add empty to fill up
     for(int i=info->nbobjective; i<10; i++){
