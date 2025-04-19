@@ -88,5 +88,5 @@ inputs : max, the index in toplace**; index, the index of the road in toplace[ma
 1 2 3: color to be picked; -1 -2 -3: color ready to be placed
 10 if no card available(pick random?), 11 if only joker, 12 if any color
 skip road if any color can be used, then comes back later: */
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index);
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index, int index2);
 #endif

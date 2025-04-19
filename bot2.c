@@ -29,15 +29,15 @@ void bot_2(Board* bord, Player_Info* info){
 
     // TODO: check if enough wagons are left before ?? picking objective, placing road?, other?
     //change dijkstra : priority to (roads without color?, less roads?)
-    
+    // wtf happens if nothing in toplace, if city is blocked, ... debug
+    // pioche objectifs: debut, milieu partie
+
+
     //debug
     print_toplace(toplace);
     printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
     printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road_i, toplace[max_i]->path[road_i], toplace[max_i]->path[road_i+1]);
     printf("NEXT ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road2_i, toplace[max_i]->path[road2_i], toplace[max_i]->path[road2_i+1]);
-
-
-
 
     //cleanup
     destroy_toplace(toplace);

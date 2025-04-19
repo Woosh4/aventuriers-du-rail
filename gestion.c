@@ -396,13 +396,18 @@ int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, in
     return j;
 }
 
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index){
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index, int index2){
     int city1 = toplace[max]->path[index];
     int city2 = toplace[max]->path[index+1];
     int color = bord->MatRoute[city1][city2].color;
     int color2 = bord->MatRoute[city1][city2].color2;
 
-    //found a road with a set color
+    int city3 = toplace[max]->path[index2];
+    int city4 = toplace[max]->path[index2+1];
+    int color3 = bord->MatRoute[city3][city4].color;
+    int color4 = bord->MatRoute[city3][city4].color2;
+
+    //find a road with a set color (!= multicolor)
     if(bord->MatRoute[city1][city2].color != 9){
         //PROBLEM: does not take into account what color is needed for future roads (if 2 colors available for 1 road (especially?))
         //enough to place
@@ -410,6 +415,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
         if(color2 != 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
 
         //not enough : find which color to go for
+        //when you pick a card, can you instantly see the new card available or not?
         //go for color1
         if(info->cards[color] > info->cards[color2]){
             //AAAAAAAAAAAAAAAA : fonction seulement pour piocher la carte; prendre en compte le fait de piocher 2 fois: trouver une 2e route (avec find index à modifier)
