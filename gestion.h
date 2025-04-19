@@ -72,16 +72,20 @@ void print_toplace(To_Place** toplace);
 /* create an array of toplace and fills it using dijkstra, also fills EV*/
 To_Place** To_place_create(Board* bord, Player_Info* info);
 
-//TODO
-
-/* searches in To_Place array, with EV, what card color is needed to build the road,
-(taking into account how many cards are in hand)
--1 if no card available(pick random?), -2 if only joker, -3 if any color
-skip road if any color can be used, then comes back later: */
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace);
-
 /*finds maximum EV in the toplace array and returns its position, returns -1 if error*/
 int find_max_ev(To_Place** toplace);
 
 void destroy_toplace(To_Place** toplace);
+
+//TODO
+
+/*returns the index of the road in toplace[maxEV]->path we want to place next*/
+int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max);
+
+/* returns what color should be picked / placed
+inputs : max, the index in toplace**; index, the index of the road in toplace[max] we want to place
+1 2 3: color to be picked; -1 -2 -3: color ready to be placed
+10 if no card available(pick random?), 11 if only joker, 12 if any color
+skip road if any color can be used, then comes back later: */
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index);
 #endif

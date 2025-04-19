@@ -4,6 +4,7 @@
 void bot_2(Board* bord, Player_Info* info){
     //beginning of the game
     //picks all 3 objectives (to change, with: calculate EV, compare to an average?)
+    //TODO IMPORTANT: have an array with all the colors needed to fill an objective ?, to pick cards effectively?
 
     if(bord->when == -1){
         bord->when = 0;
@@ -22,7 +23,10 @@ void bot_2(Board* bord, Player_Info* info){
     To_Place** toplace = To_place_create(bord, info);
     int max_i = find_max_ev(toplace);
 
+    //find index in toplace, then find road index, then find (color to be picked OR color to be placed OR Else?)
+
     // TODO: check if enough wagons are left before ?? picking objective, placing road?, other?
+    //change dijkstra : priority to (roads without color?, less roads?)
     
     //debug
     print_toplace(toplace);
