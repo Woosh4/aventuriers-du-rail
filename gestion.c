@@ -357,8 +357,8 @@ void print_toplace(To_Place** toplace){
                 }
                 // printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
             }
-        }
-        printf("\n");
+            printf("\n");
+        } 
     }
     printf("----------\n");
 }
@@ -377,22 +377,23 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
     return toplace;
 }
 
-int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max){
+int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, int num){
     int i = 0;
+    int j;
     int found = 0;
 
     //search for the road we want to build
     //search a road with a set color first
-    while(toplace[max]->path[i+1] != -1 && !found){
+    while(toplace[max]->path[i+1] != -1 && found <= num){
         if(bord->MatRoute[toplace[max]->path[i]][toplace[max]->path[i+1]].color != 9){
-            found = 1;
-            i = i-2;
+            found ++;
+            j = i;
         }
         i = i+2;
     }
     //if not found take the first road (it should not have a set color if everything goes right)
-    if(!found) i = 0;
-    return i;
+    if(found <= num) j = 0;
+    return j;
 }
 
 int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index){
@@ -421,7 +422,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
 }
 
 int find_max_ev(To_Place** toplace){
-    int max = -1;
+    float max = -1;
     int i = -1;
     for(int j=0; j<10; j++){ // 10 toplace in the array
         if(toplace[j] != NULL){

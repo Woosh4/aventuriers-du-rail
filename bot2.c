@@ -22,6 +22,8 @@ void bot_2(Board* bord, Player_Info* info){
     //init toplace
     To_Place** toplace = To_place_create(bord, info);
     int max_i = find_max_ev(toplace);
+    int road_i = search_index(bord, info, toplace, max_i, 0);
+    int road2_i = search_index(bord, info, toplace, max_i, 1);
 
     //find index in toplace, then find road index, then find (color to be picked OR color to be placed OR Else?)
 
@@ -31,6 +33,9 @@ void bot_2(Board* bord, Player_Info* info){
     //debug
     print_toplace(toplace);
     printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
+    printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road_i, toplace[max_i]->path[road_i], toplace[max_i]->path[road_i+1]);
+    printf("NEXT ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road2_i, toplace[max_i]->path[road2_i], toplace[max_i]->path[road2_i+1]);
+
 
 
 
