@@ -77,11 +77,15 @@ int find_max_ev(To_Place** toplace);
 
 void destroy_toplace(To_Place** toplace);
 
-//TODO
-
+//TO BE REMOVED
 /*returns the index of the road in toplace[maxEV]->path we want to place next (with num=0),
 if num=1 gives the second road instead, returns 0 if no route with a set color available*/
 int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, int num);
+///////////////////:
+//TODO
+
+/* updates priority in the toplace array for each item*/
+void update_priority(Board* bord, Player_Info* info, To_Place** toplace);
 
 /* returns what color should be picked / placed
 inputs : max, the index in toplace**; index, the index of the road in toplace[max] we want to place

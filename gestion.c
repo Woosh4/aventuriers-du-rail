@@ -260,7 +260,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     //route taken by player
     if(bord->MatRoute[city1][city2].taken == 0){
         if(dijk[city2].weight > dijk[city1].weight){
-             dijk[city2].weight = dijk[city1].weight;
+            dijk[city2].weight = dijk[city1].weight;
             dijk[city2].prev = city1;
             //if(dijk[city2].prev == -1) dijk[city2].prev = city1;
         }
@@ -285,6 +285,8 @@ To_Place* shortest(Board* bord, int city1, int city2){
     int city;
     To_Place* toplace = malloc(sizeof(To_Place));
     toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
+    toplace->priority = malloc(bord->gamedata->nbCities * sizeof(int));
+    for(int i=0; i<bord->gamedata->nbCities; i++) toplace->priority[i] = -1;
     toplace->city1 = city1;
     toplace->city2 = city2;
     toplace->nbwagons = 0;
@@ -349,13 +351,20 @@ void print_toplace(To_Place** toplace){
     for(int i=0; i<10; i++){
         j = 0;
         if(toplace[i] != NULL){ // check if toplace[i] is null
-        printf("FROM: %d TO: %d NBWAGONS: %d EV: %f PRIORITY: %d\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev, toplace[i]->priority);
+        printf("FROM: %d TO: %d NBWAGONS: %d EV: %f\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev);
             if(toplace[i]->path != NULL){
                 while(toplace[i]->path[j+1] != -1){
                     printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
                     j = j+2;
                 }
-                // printf("from %d to %d ; ",toplace[i]->path[j], toplace[i]->path[j+1]);
+            }
+            printf("\n");
+            if(toplace[i]->priority != NULL){
+                j = 0;
+                while(toplace[i]->priority[j] != -1){
+                    printf("priority: %d ;", toplace[i]->priority[j]);
+                    j++;
+                }
             }
             printf("\n");
         } 
@@ -375,6 +384,37 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
         toplace[i] = NULL;
     }
     return toplace;
+}
+
+void update_priority(Board* bord, Player_Info* info, To_Place** toplace){
+    int priority;
+    int j;
+
+    for(int i=0; i<10; i++){
+        j = 0;
+        priority = 0;
+        
+        if(toplace[i] != NULL){
+            //search roads with a set color first
+            while(toplace[i]->path[j+1] != -1){
+                if(bord->MatRoute[toplace[i]->path[j]][toplace[i]->path[j+1]].color != 9){
+                    toplace[i]->priority[j/2] = priority;
+                    priority ++;
+                }
+                j = j+2;
+            }
+            //add the remaining roads (without a set color)
+            j = 0;
+            while(toplace[i]->path[j+1] != -1){
+                if(toplace[i]->priority[j/2] == -1){
+                    toplace[i]->priority[j/2] = priority;
+                    priority++;
+                }
+                j = j+2;
+            }
+        }
+    }
+    return;
 }
 
 int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, int num){

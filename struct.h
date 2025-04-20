@@ -36,10 +36,10 @@ typedef struct{
 typedef struct{
     int city1; //filled with dijkstra
     int city2; //filled with dijkstra
-    int priority; // unused ?
     float ev; // points / nbwagons for placing a road, how many for blocking a road?
     int nbwagons; //filled with dijkstra
     int* path; //filled with dijkstra
+    int* priority; // array to know the order in which we want to place the routes
     // path : [city1, city2, city2, city3, ...,cityx, -1, -1]= road from 1→2 then 2→3
 }To_Place;
 
