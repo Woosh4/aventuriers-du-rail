@@ -366,7 +366,7 @@ void print_toplace(To_Place** toplace){
                     j++;
                 }
             }
-            printf("\n");
+            printf("\n\n");
         } 
     }
     printf("----------\n");
@@ -374,13 +374,26 @@ void print_toplace(To_Place** toplace){
 
 To_Place** To_place_create(Board* bord, Player_Info* info){
     To_Place** toplace = malloc(10 * sizeof(To_Place*));
+    int index = 0;
     //add objective roads
     for(int i=0; i<info->nbobjective; i++){
-        toplace[i] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
-        toplace[i]->ev = (float)(info->objective[i]->score) / (float)(toplace[i]->nbwagons);
+        toplace[index] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
+        toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[i]->nbwagons);
+        // if the 2 cities are already connected do not add them to toplace. (reset)
+        // same if one of them is blocked off
+        if(toplace[i]->nbwagons == 0 || toplace[i]->nbwagons > 100){
+            toplace[index]->city1 = -1;
+            toplace[index]->city2 = -1;
+            toplace[index]->ev = -1;
+            toplace[index]->path[0] = -1;
+            toplace[index]->path[1] = -1;
+            toplace[index]->priority[0] = -1;
+            index--;
+        }
+        index++;
     }
     //add empty to fill up
-    for(int i=info->nbobjective; i<10; i++){
+    for(int i=index; i<10; i++){
         toplace[i] = NULL;
     }
     return toplace;
@@ -417,54 +430,114 @@ void update_priority(Board* bord, Player_Info* info, To_Place** toplace){
     return;
 }
 
-int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, int num){
+int find_min_priority(Board* bord, Player_Info* info, To_Place** toplace, int max){
     int i = 0;
-    int j;
-    int found = 0;
-
-    //search for the road we want to build
-    //search a road with a set color first
-    while(toplace[max]->path[i+1] != -1 && found <= num){
-        if(bord->MatRoute[toplace[max]->path[i]][toplace[max]->path[i+1]].color != 9){
-            found ++;
-            j = i;
-        }
-        i = i+2;
+    //find the road with the lowest priority (=0)
+    while(toplace[max]->priority[i] != -1){
+        if(toplace[max]->priority[i] == 0) return 2*i;
+        i++;
     }
-    //if not found take the first road (it should not have a set color if everything goes right)
-    if(found <= num) j = 0;
-    return j;
+    printf("ERROR : FIND MIN PRIORITY NOT FOUND\n");
+    return -1;
 }
 
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index, int index2){
-    int city1 = toplace[max]->path[index];
-    int city2 = toplace[max]->path[index+1];
-    int color = bord->MatRoute[city1][city2].color;
-    int color2 = bord->MatRoute[city1][city2].color2;
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick){
+    int priority = 0;
+    int i = 0;
+    int found = 0;
+    int nb_road = 0;
 
-    int city3 = toplace[max]->path[index2];
-    int city4 = toplace[max]->path[index2+1];
-    int color3 = bord->MatRoute[city3][city4].color;
-    int color4 = bord->MatRoute[city3][city4].color2;
+    int city1;
+    int city2;
+    int color1;
+    int color2;
 
-    //find a road with a set color (!= multicolor)
-    if(bord->MatRoute[city1][city2].color != 9){
-        //PROBLEM: does not take into account what color is needed for future roads (if 2 colors available for 1 road (especially?))
-        //enough to place
-        if(info->cards[color] >= bord->MatRoute[city1][city2].length) return -color;
-        if(color2 != 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
+    //find the number of roads
+    while(toplace[max]->priority[i] != -1){
+        nb_road++;
+        i++;
+    }
+    for(int k=0; k<nb_road; k++){
+        i = 0;
+        found = 0;
 
-        //not enough : find which color to go for
-        //when you pick a card, can you instantly see the new card available or not?
-        //go for color1
-        if(info->cards[color] > info->cards[color2]){
-            //AAAAAAAAAAAAAAAA : fonction seulement pour piocher la carte; prendre en compte le fait de piocher 2 fois: trouver une 2e route (avec find index à modifier)
+        //find the road with the lowest priority that has not been checked yet
+        while(toplace[max]->priority[i] != -1 && !found){
+            if(toplace[max]->priority[i] == priority){
+                i--; //neutralize i++
+                found = 1; //stop while loop
+                priority++; // next time search for 1 priority higher
+            }
+            i++;
+        }
+
+        //debug
+        printf("NOW CHECKING ROAD OF INDEX: %d\n", i);
+
+        //for convenience
+        city1 = toplace[max]->path[2*i];
+        city2 = toplace[max]->path[2*i+1];
+        color1 = bord->MatRoute[city1][city2].color;
+        color2 = bord->MatRoute[city1][city2].color2;
+
+        //not good, should never be true
+        if(toplace[max]->priority[i] == -1){
+            printf("AAAAA\nAAAAA\nAAAAA\nNOT GOOD: PROBLEM IN SEARCH_COLOR_PICK\n");
+            //pick random just in case..
+            return 10;
+        }
+
+        //found road has a set color
+        if(color1 != 9){
+            //already enough to place
+            if(!pick){
+                if(info->cards[color1] >= bord->MatRoute[city1][city2].length) return -color1;
+                if(info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
+            }
+
+            //TO CHANGE: WHAT TO DO IF ROAD HAS 2 COLORS ?
+            //not enough to place, can we pick a visible card ?
+            getBoardState(bord->cards_pickable);
+            for(int j=0; j<5; j++){
+                if(bord->cards_pickable->card[j] == color1) return color1;
+                if(bord->cards_pickable->card[j] == color2) return color2;
+            }
+
+            //can't pick a visible card, try with a joker
+            if(!pick){
+                if(info->cards[color1] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color1 -10);
+                if(info->cards[color2] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color2 -10);
+            }
+
+            //try to pick for next route (loop)
+            pick = 1;
+        }
+
+        //found road does NOT have a set color
+        if(color1 == 9){
+            // pick a random card if pick=1
+            if(pick) return 10;
+
+            //try to place the road if priority = 0
+            if(toplace[max]->priority[i] == 0){
+                for(int j=1; j<9; j++){
+                    if(info->cards[j] >= bord->MatRoute[city1][city2].length) return (-info->cards[j]);
+                }
+            }
+            //else pick random
+            return 10;
         }
     }
-    // enough wagons of desired color to place? is color available to pick?
-    
-    
-    return ;
+
+    printf("AAAAA\nAAAAA\nAAAAA\n GOT TO THE END OF SEARCH_COLOR_PICK\n");
+    return 10;
+    ////////////////////////////////////////////////////////////
+    // penser à: jokers(check si on peut piocher pour garder le joker), , 2 couleurs sur 1 route
+    //1 assez de cartes pour poser, sinon
+    //2 cartes dispo à piocher, sinon (basculer pioche)
+    //3 assez de cartes avec les jokers, sinon
+    //4 pioche pour la ville suivante (basculer pioche)
+    //5 pick random
 }
 
 int find_max_ev(To_Place** toplace){
@@ -494,4 +567,10 @@ void destroy_toplace(To_Place** toplace){
         }
     }
     free(toplace);
+}
+
+int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice){
+    // decode the choice to color
+    choice = -choice -10;
+    return bord->MatRoute[toplace[max]->path[road]][toplace[max]->path[road+1]].length - info->cards[choice];
 }

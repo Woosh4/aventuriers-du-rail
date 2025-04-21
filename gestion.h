@@ -77,20 +77,31 @@ int find_max_ev(To_Place** toplace);
 
 void destroy_toplace(To_Place** toplace);
 
-//TO BE REMOVED
-/*returns the index of the road in toplace[maxEV]->path we want to place next (with num=0),
-if num=1 gives the second road instead, returns 0 if no route with a set color available*/
-int search_index(Board* bord, Player_Info* info, To_Place** toplace, int max, int num);
-///////////////////:
-//TODO
-
-/* updates priority in the toplace array for each item*/
+/* updates priority in the toplace array for each road
+currently: roads with a set color first, the the others*/
 void update_priority(Board* bord, Player_Info* info, To_Place** toplace);
 
+/* finds the index in toplace[max]->path of the road with the lowest priority*/
+int find_min_priority(Board* bord, Player_Info* info, To_Place** toplace, int max);
+
+//TODO
+
 /* returns what color should be picked / placed
-inputs : max, the index in toplace**; index, the index of the road in toplace[max] we want to place
+inputs : max, the index in toplace** ; pick: 1 if we are playing again after picking a card
 1 2 3: color to be picked; -1 -2 -3: color ready to be placed
+                         ; -11 -12 -13: color + some amount of joker to be placed (-color -10)
 10 if no card available(pick random?), 11 if only joker, 12 if any color
-skip road if any color can be used, then comes back later: */
-int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int index, int index2);
+skip road if any color can be used, then comes back later:
+
+//1 assez de cartes pour poser, sinon
+//2 cartes dispo à piocher, sinon (basculer pioche)
+//3 assez de cartes avec les jokers, sinon          utiliser jokers plus tard?
+//4 pioche pour la ville suivante (basculer pioche)
+//5 pick random
+ */
+int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
+
+/* returns how many jokers are needed to place the road in toplace[max]->path[road] of specific color.
+color is to be between -11 and -18 for it work properly (convention used in search_color_pick)*/
+int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice);
 #endif

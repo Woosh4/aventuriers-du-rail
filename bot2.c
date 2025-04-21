@@ -22,9 +22,36 @@ void bot_2(Board* bord, Player_Info* info){
     //init toplace
     To_Place** toplace = To_place_create(bord, info);
     int max_i = find_max_ev(toplace);
-    // int road_i = search_index(bord, info, toplace, max_i, 0);
-    // int road2_i = search_index(bord, info, toplace, max_i, 1);
     update_priority(bord, info, toplace);
+    int road = find_min_priority(bord, info, toplace, max_i);
+    int choice = search_color_pick(bord, info, toplace, max_i, 0);
+
+    //pick visible card
+    if(choice >= 1 && choice <= 8){
+        info->movedata->action = 3;
+        info->movedata->drawCard = choice;
+    }
+    //draw blind card
+    else if(choice == 10){
+        info->movedata->action == 2;
+    }
+    //place road without joker
+    else if(choice <= -1 && choice >= -8){
+        info->movedata->action = 1;
+        info->movedata->claimRoute.from = toplace[max_i]->path[road];
+        info->movedata->claimRoute.to = toplace[max_i]->path[road+1];
+        info->movedata->claimRoute.color = -choice;
+        info->movedata->claimRoute.nbLocomotives = 0;
+    }
+    //place route with joker
+    else if(choice <= -11 && choice >= -18){
+        info->movedata->action = 1;
+        info->movedata->claimRoute.from = toplace[max_i]->path[road];
+        info->movedata->claimRoute.to = toplace[max_i]->path[road+1];
+        info->movedata->claimRoute.color = -choice -10;
+        info->movedata->claimRoute.nbLocomotives = find_nb_joker(bord, info, toplace, max_i, road, choice);
+    }
+
 
     //find index in toplace, then find road index, then find (color to be picked OR color to be placed OR Else?)
 
@@ -32,14 +59,15 @@ void bot_2(Board* bord, Player_Info* info){
     //change dijkstra : priority to (roads without color?, less roads?)
     // wtf happens if nothing in toplace, if city is blocked, ... debug
     // pioche objectifs: debut, milieu partie
-    // have an array to know the order in which we want to place the roads instead of looking at the next city (change search color pick)
+    // tableau avec nb couleurs nécessaires pour le chemin entier → routes de plusieurs couleurs
+    // route sans couleur: pick random ou pioche couleur ?
 
 
     //debug
     print_toplace(toplace);
     printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
-    // printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road_i, toplace[max_i]->path[road_i], toplace[max_i]->path[road_i+1]);
-    // printf("NEXT ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road2_i, toplace[max_i]->path[road2_i], toplace[max_i]->path[road2_i+1]);
+    printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
+    printf("CHOICE MADE BY SEARCH_COLOR : %d\n", choice);
 
     //cleanup
     destroy_toplace(toplace);

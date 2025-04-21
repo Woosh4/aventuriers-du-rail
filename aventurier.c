@@ -121,6 +121,7 @@ int main(){
     //     sendMove(info_p0->movedata,info_p0->moveresult);
     //     if(info_p0->movedata->action == 4 || info_p0->movedata->action == 2 || (info_p0->movedata->action == 3 && info_p0->movedata->drawCard != 9  )){
     //         //printf("a qui ? : %d\n", a_qui(&mymove, &opponent_move, &mygamedata, &quand));
+    //         getBoardState(board->cards_pickable);
     //         select_move_manuel(info_p0);
     //         update_board(board, info_p0);
     //         update_player_info(info_p0, board);
