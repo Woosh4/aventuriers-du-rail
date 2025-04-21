@@ -55,7 +55,7 @@ int main(){
     printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv44");
+    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv45");
     printf("connected? : code %d\n", connect);
     sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889

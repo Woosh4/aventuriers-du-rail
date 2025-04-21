@@ -177,7 +177,7 @@ void update_player_info(Player_Info* info, Board* bord){
     case 3:
         info->nbcards++;
         if(info->player_number == 0){
-            info->cards[info->moveresult->card]++;
+            info->cards[info->movedata->drawCard]++;
         }
         return;
         break;
@@ -379,16 +379,11 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
     //add objective roads
     for(int i=0; i<info->nbobjective; i++){
         toplace[index] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
-        toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[i]->nbwagons);
+        toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[index]->nbwagons);
         // if the 2 cities are already connected do not add them to toplace. (reset)
         // same if one of them is blocked off
-        if(toplace[i]->nbwagons == 0 || toplace[i]->nbwagons > 100){
-            toplace[index]->city1 = -1;
-            toplace[index]->city2 = -1;
-            toplace[index]->ev = -1;
-            toplace[index]->path[0] = -1;
-            toplace[index]->path[1] = -1;
-            toplace[index]->priority[0] = -1;
+        if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
+            free(toplace[index]);
             index--;
         }
         index++;
@@ -492,8 +487,8 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
         if(color1 != 9){
             //already enough to place
             if(!pick){
-                if(info->cards[color1] >= bord->MatRoute[city1][city2].length) return -color1;
-                if(color2 != 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
+                if(info->cards[color1] >= bord->MatRoute[city1][city2].length) return (-color1);
+                if(color2 != 0 && (info->cards[color2] >= bord->MatRoute[city1][city2].length)) return (-color2);
             }
 
             //TO CHANGE: WHAT TO DO IF ROAD HAS 2 COLORS ?
@@ -506,7 +501,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
             //can't pick a visible card, try with a joker
             if(!pick){
                 if(info->cards[color1] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color1 -10);
-                if(color2 != 0 && info->cards[color2] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color2 -10);
+                if((color2 != 0 && (info->cards[color2] + info->cards[9])) >= bord->MatRoute[city1][city2].length) return (-color2 -10);
             }
 
             //try to pick for next route (loop)
