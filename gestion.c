@@ -161,7 +161,8 @@ void update_player_info(Player_Info* info, Board* bord){
 
         info->nbwagons -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
         info->nbcards -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
-        info->cards[info->movedata->claimRoute.color] -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length;
+        info->cards[info->movedata->claimRoute.color] -= bord->MatRoute[info->movedata->claimRoute.from][info->movedata->claimRoute.to].length - info->movedata->claimRoute.nbLocomotives;
+        info->cards[9] -= info->movedata->claimRoute.nbLocomotives;
         return;
         break;
     
@@ -472,7 +473,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
         }
 
         //debug
-        printf("NOW CHECKING ROAD OF INDEX: %d\n", i);
+        // printf("NOW CHECKING ROAD OF INDEX: %d\n", i);
 
         //for convenience
         city1 = toplace[max]->path[2*i];
@@ -492,12 +493,11 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
             //already enough to place
             if(!pick){
                 if(info->cards[color1] >= bord->MatRoute[city1][city2].length) return -color1;
-                if(info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
+                if(color2 != 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length) return -color2;
             }
 
             //TO CHANGE: WHAT TO DO IF ROAD HAS 2 COLORS ?
             //not enough to place, can we pick a visible card ?
-            getBoardState(bord->cards_pickable);
             for(int j=0; j<5; j++){
                 if(bord->cards_pickable->card[j] == color1) return color1;
                 if(bord->cards_pickable->card[j] == color2) return color2;
@@ -506,7 +506,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
             //can't pick a visible card, try with a joker
             if(!pick){
                 if(info->cards[color1] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color1 -10);
-                if(info->cards[color2] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color2 -10);
+                if(color2 != 0 && info->cards[color2] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color2 -10);
             }
 
             //try to pick for next route (loop)
@@ -521,7 +521,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
             //try to place the road if priority = 0
             if(toplace[max]->priority[i] == 0){
                 for(int j=1; j<9; j++){
-                    if(info->cards[j] >= bord->MatRoute[city1][city2].length) return (-info->cards[j]);
+                    if(info->cards[j] >= bord->MatRoute[city1][city2].length) return (-j);
                 }
             }
             //else pick random
@@ -572,5 +572,7 @@ void destroy_toplace(To_Place** toplace){
 int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice){
     // decode the choice to color
     choice = -choice -10;
-    return bord->MatRoute[toplace[max]->path[road]][toplace[max]->path[road+1]].length - info->cards[choice];
+    int joker = (bord->MatRoute[toplace[max]->path[road]][toplace[max]->path[road+1]].length - info->cards[choice]);
+    if(joker < 0) joker = 0;
+    return joker;
 }

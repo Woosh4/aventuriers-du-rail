@@ -20,20 +20,24 @@ void bot_2(Board* bord, Player_Info* info){
     }
 
     //init toplace
+    int replay = 0;
     To_Place** toplace = To_place_create(bord, info);
     int max_i = find_max_ev(toplace);
     update_priority(bord, info, toplace);
     int road = find_min_priority(bord, info, toplace, max_i);
+    getBoardState(bord->cards_pickable);
     int choice = search_color_pick(bord, info, toplace, max_i, 0);
 
     //pick visible card
     if(choice >= 1 && choice <= 8){
         info->movedata->action = 3;
         info->movedata->drawCard = choice;
+        replay = 1;
     }
     //draw blind card
     else if(choice == 10){
-        info->movedata->action == 2;
+        info->movedata->action = 2;
+        replay = 1;
     }
     //place road without joker
     else if(choice <= -1 && choice >= -8){
@@ -52,6 +56,43 @@ void bot_2(Board* bord, Player_Info* info){
         info->movedata->claimRoute.nbLocomotives = find_nb_joker(bord, info, toplace, max_i, road, choice);
     }
 
+    ////////bunch of debug
+    printf("CHOICE MADE BY SEARCH_COLOR : %d\n", choice);
+    print_toplace(toplace);
+    printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
+    printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
+    ///////////
+    sendMove(info->movedata, info->moveresult);
+    update_board(bord, info);
+    update_player_info(info, bord);
+    getBoardState(bord->cards_pickable);
+
+    if(replay){
+        // take a new choice (with pick=1 !)
+        choice = search_color_pick(bord, info, toplace, max_i, 1);
+
+        //pick visible card
+        if(choice >= 1 && choice <= 8){
+            info->movedata->action = 3;
+            info->movedata->drawCard = choice;
+            replay = 1;
+        }
+        //draw blind card
+        else if(choice == 10){
+            info->movedata->action = 2;
+            replay = 1;
+        }
+
+        ////////bunch of debug
+        printf("CHOICE MADE BY SEARCH_COLOR : %d\n", choice);
+        print_toplace(toplace);
+        printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
+        printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
+        ///////////
+        sendMove(info->movedata, info->moveresult);
+        update_board(bord, info);
+        update_player_info(info, bord);
+    }
 
     //find index in toplace, then find road index, then find (color to be picked OR color to be placed OR Else?)
 
@@ -64,10 +105,9 @@ void bot_2(Board* bord, Player_Info* info){
 
 
     //debug
-    print_toplace(toplace);
-    printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
-    printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
-    printf("CHOICE MADE BY SEARCH_COLOR : %d\n", choice);
+    // print_toplace(toplace);
+    // printf("MAX EV FOUND : N° %d, EV=%f\n", max_i, toplace[max_i]->ev);
+    // printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
 
     //cleanup
     destroy_toplace(toplace);

@@ -93,7 +93,7 @@ int main(){
         
         //main loop body
         printBoard();
-        bot_dumb1(board, info_p0);
+        // bot_dumb1(board, info_p0);
         bot_2(board, info_p0);
         if(info_p0->moveresult->state) break;
 
