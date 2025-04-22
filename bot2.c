@@ -22,6 +22,20 @@ void bot_2(Board* bord, Player_Info* info){
     //init toplace
     int replay = 0;
     To_Place** toplace = To_place_create(bord, info);
+
+    //if no objective left pick 3 more TO BE CHANGED ---------------
+    if(toplace[0] == NULL){
+        info->movedata->action = 4;
+        sendMove(info->movedata,info->moveresult);
+        info->movedata->action = 5;
+        info->movedata->chooseObjectives[0] = 1;
+        info->movedata->chooseObjectives[1] = 1;
+        info->movedata->chooseObjectives[2] = 1;
+        sendMove(info->movedata,info->moveresult);
+        update_player_info(info, bord);
+        return;
+    }
+
     int max_i = find_max_ev(toplace);
     update_priority(bord, info, toplace);
     int road = find_min_priority(bord, info, toplace, max_i);

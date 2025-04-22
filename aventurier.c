@@ -139,8 +139,12 @@ int main(){
     //     }
     // }
 
+    int quit = quitGame();
+    printf("Quit Game : code %d\n",quit);
+
     destroy_board(board);
     destroy_player_info(info_p0);
     destroy_player_info(info_p1);
+
     return 0;
 }
