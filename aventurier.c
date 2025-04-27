@@ -49,6 +49,11 @@ update all*/
 int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
+    int NBGAMES = 1; //number of games to play for the loop
+
+    //file to extract the objectives and their points
+    FILE* file_objectives = fopen("objectives.txt","w");
+    fprintf(file_objectives, "City1: City2: Points: \n");
 
     Board* board = alloc_board();
 
@@ -57,6 +62,10 @@ int main(){
     // connect v2
     int connect = connectToCGS("82.29.170.160", 15001, "Alexisv45");
     printf("connected? : code %d\n", connect);
+
+    //LOOP TO PLAY MULTIPLE GAMES
+    for(int nbgame=0; nbgame<NBGAMES; nbgame++){
+
     sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
@@ -139,12 +148,21 @@ int main(){
     //     }
     // }
 
+
+    for(int bla=0; bla<info_p0->nbobjective; bla++){
+        fprintf(file_objectives, "%d %d %d\n", info_p0->objective[bla]->from,info_p0->objective[bla]->to,info_p0->objective[bla]->score);
+    }
+
+    destroy_player_info(info_p0);
+    destroy_player_info(info_p1);
+
+    } //end of the loop to play multiple games
+
+    fclose(file_objectives);
     int quit = quitGame();
     printf("Quit Game : code %d\n",quit);
 
     destroy_board(board);
-    destroy_player_info(info_p0);
-    destroy_player_info(info_p1);
-
+    
     return 0;
 }

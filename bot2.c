@@ -33,6 +33,7 @@ void bot_2(Board* bord, Player_Info* info){
         info->movedata->chooseObjectives[2] = 1;
         sendMove(info->movedata,info->moveresult);
         update_player_info(info, bord);
+        destroy_toplace(toplace, info);
         return;
     }
 
@@ -124,6 +125,6 @@ void bot_2(Board* bord, Player_Info* info){
     // printf("ROAD TO BE PLACED FOUND : INDEX IN TOPLACE[MAX]: %d, FROM:%d, TO:%d\n", road, toplace[max_i]->path[road], toplace[max_i]->path[road+1]);
 
     //cleanup
-    destroy_toplace(toplace);
+    destroy_toplace(toplace, info);
     return;
 }

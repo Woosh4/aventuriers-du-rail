@@ -75,7 +75,7 @@ To_Place** To_place_create(Board* bord, Player_Info* info);
 /*finds maximum EV in the toplace array and returns its position, returns -1 if error*/
 int find_max_ev(To_Place** toplace);
 
-void destroy_toplace(To_Place** toplace);
+void destroy_toplace(To_Place** toplace, Player_Info* info);
 
 /* updates priority in the toplace array for each road
 currently: roads with a set color first, the the others*/

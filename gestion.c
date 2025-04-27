@@ -210,12 +210,13 @@ Board* alloc_board(){
 void init_board(Board* bord){
     getBoardState(bord->cards_pickable);
     bord->MatRoute = allouer_matrice_route(bord->gamedata->nbCities);
+    bord->when = -1;
     convert_tab_matrice(bord);
 }
 
 void destroy_board(Board* bord){
-    free(bord->MatRoute);
     free(bord->cards_pickable);
+    destroy_matrice_route(bord->MatRoute, bord->gamedata->nbCities);
     free(bord->gamedata);
     free(bord);
 }
@@ -404,6 +405,8 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
         // if the 2 cities are already connected do not add them to toplace. (reset)
         // same if one of them is blocked off
         if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
+            free(toplace[index]->path);
+            free(toplace[index]->priority);
             free(toplace[index]);
             index--;
         }
@@ -575,10 +578,11 @@ int find_max_ev(To_Place** toplace){
 }
 
 /*OK it seems ?*/
-void destroy_toplace(To_Place** toplace){
-    for(int i=0; i<10; i++){ // 10 toplace in the array
+void destroy_toplace(To_Place** toplace, Player_Info* info){
+    for(int i=0; i<info->nbobjective; i++){ // nbobjective toplace allocated in the array (for now)
         if(toplace[i] != NULL){
             free(toplace[i]->path);
+            free(toplace[i]->priority);
             free(toplace[i]);
         }
     }
