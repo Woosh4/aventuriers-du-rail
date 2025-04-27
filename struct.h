@@ -45,8 +45,8 @@ typedef struct{
 
 typedef struct{
     int checked;
-    int weight;
-    int prev;
+    int weight; // nb of wagons from origin city
+    int color_forced; // nb of wagons of a set color we are forced to use (i try to minimize it to gain speed during road placement)
+    int prev; // previous city, to rebuild the path
 }Dijkstra_City;
-// tab containing shortest + priority level to track which routes i want to take?
 #endif

@@ -263,7 +263,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         if(dijk[city2].weight > dijk[city1].weight){
             dijk[city2].weight = dijk[city1].weight;
             dijk[city2].prev = city1;
-            //if(dijk[city2].prev == -1) dijk[city2].prev = city1;
+            
         }
         return;
     }
@@ -272,9 +272,29 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         return;
     }
     //route is free to take
-    else if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
-        dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
-        dijk[city2].prev = city1;
+    else if(dijk[city2].weight >= (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
+        if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
+            dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
+            dijk[city2].prev = city1;
+            if(bord->MatRoute[city1][city2].color != 9) dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
+        }
+        //if both have the same weight, choose the one with the minimum forced colors
+        if(dijk[city2].weight == (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
+            if(bord->MatRoute[city1][city2].color != 9){ // route has a set color
+                if(dijk[city2].color_forced > (dijk[city1].color_forced + bord->MatRoute[city1][city2].length)){
+                    dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
+                    dijk[city2].prev = city1;
+                    dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
+                }
+            }
+            else{ // route does not have a set color
+                if(dijk[city2].color_forced > dijk[city1].color_forced){
+                    dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
+                    dijk[city2].prev = city1;
+                    dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
+                }
+            }
+        }
     }
     return;
 }
@@ -298,6 +318,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
          dijkstra[i].checked = 0;
          dijkstra[i].weight = __INT_MAX__;
          dijkstra[i].prev = -1;
+         dijkstra[i].color_forced = 0;
     }
     dijkstra[city1].weight = 0;
 

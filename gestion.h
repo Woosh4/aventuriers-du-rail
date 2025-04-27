@@ -84,7 +84,7 @@ void update_priority(Board* bord, Player_Info* info, To_Place** toplace);
 /* finds the index in toplace[max]->path of the road with the lowest priority*/
 int find_min_priority(Board* bord, Player_Info* info, To_Place** toplace, int max);
 
-//TODO
+//TODO ?
 
 /* returns what color should be picked / placed
 inputs : max, the index in toplace** ; pick: 1 if we are playing again after picking a card
@@ -104,4 +104,5 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
 /* returns how many jokers are needed to place the road in toplace[max]->path[road] of specific color.
 color is to be between -11 and -18 for it work properly (convention used in search_color_pick)*/
 int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice);
+
 #endif
