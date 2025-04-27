@@ -52,8 +52,8 @@ int main(){
     int NBGAMES = 1; //number of games to play for the loop
 
     //file to extract the objectives and their points
-    FILE* file_objectives = fopen("objectives.txt","w");
-    fprintf(file_objectives, "City1: City2: Points: \n");
+    // FILE* file_objectives = fopen("objectives.txt","w");
+    // fprintf(file_objectives, "City1: City2: Points: \n");
 
     Board* board = alloc_board();
 
@@ -149,16 +149,16 @@ int main(){
     // }
 
 
-    for(int bla=0; bla<info_p0->nbobjective; bla++){
-        fprintf(file_objectives, "%d %d %d\n", info_p0->objective[bla]->from,info_p0->objective[bla]->to,info_p0->objective[bla]->score);
-    }
+    // for(int bla=0; bla<info_p0->nbobjective; bla++){
+    //     fprintf(file_objectives, "%d %d %d\n", info_p0->objective[bla]->from,info_p0->objective[bla]->to,info_p0->objective[bla]->score);
+    // }
 
     destroy_player_info(info_p0);
     destroy_player_info(info_p1);
 
     } //end of the loop to play multiple games
 
-    fclose(file_objectives);
+    // fclose(file_objectives);
     int quit = quitGame();
     printf("Quit Game : code %d\n",quit);
 
