@@ -511,8 +511,8 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
         if(color1 != 9){
             //already enough to place
             if(!pick){
-                if(info->cards[color1] >= bord->MatRoute[city1][city2].length) return (-color1);
-                if(color2 != 0 && (info->cards[color2] >= bord->MatRoute[city1][city2].length)) return (-color2);
+                if(info->cards[color1] >= bord->MatRoute[city1][city2].length && info->nbwagons >= bord->MatRoute[city1][city2].length) return (-color1);
+                if(color2 != 0 && (info->cards[color2] >= bord->MatRoute[city1][city2].length && info->nbwagons >= bord->MatRoute[city1][city2].length)) return (-color2);
             }
 
             //TO CHANGE: WHAT TO DO IF ROAD HAS 2 COLORS ?
@@ -595,4 +595,19 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
     int joker = (bord->MatRoute[toplace[max]->path[road]][toplace[max]->path[road+1]].length - info->cards[choice]);
     if(joker < 0) joker = 0;
     return joker;
+}
+
+To_Place* find_next_priority(To_Place** toplace, int priority){
+    for(int i=0; i<10; i++){
+        if(toplace[i]->priority == priority+1) return toplace[i];
+    }
+    printf("AAAAA\nAAAAA\nAAAAA\nERROR FIND NEXT PRIORITY : NOT FOUND");
+    return NULL;
+}
+
+void update_To_place_len(To_Place** toplace, Board* bord){
+
+    for(int i=0; i<10; i++){ // for all the elements in toplace
+        
+    }
 }

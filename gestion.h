@@ -105,4 +105,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
 color is to be between -11 and -18 for it work properly (convention used in search_color_pick)*/
 int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice);
 
+/* finds the next priority and returns the associate To_Place*/
+To_Place* find_next_priority(To_Place** toplace, int priority);
+
 #endif

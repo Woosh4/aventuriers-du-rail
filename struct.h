@@ -41,6 +41,7 @@ typedef struct{
     int* path; //filled with dijkstra
     int* priority; // array to know the order in which we want to place the routes
     // path : [city1, city2, city2, city3, ...,cityx, -1, -1]= road from 1→2 then 2→3
+    int length_est; // estimate of the length of the path : we assume the paths with a lower priority are already taken.
 }To_Place;
 
 typedef struct{
