@@ -22,6 +22,7 @@ void bot_2(Board* bord, Player_Info* info){
     //init toplace
     int replay = 0;
     To_Place** toplace = To_place_create(bord, info);
+    update_To_place_len(toplace, bord, info);
 
     //if no objective left pick 3 more TO BE CHANGED ---------------
     if(toplace[0] == NULL){

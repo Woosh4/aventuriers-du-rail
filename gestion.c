@@ -589,6 +589,12 @@ void destroy_toplace(To_Place** toplace, Player_Info* info){
     free(toplace);
 }
 
+void destroy_place(To_Place* place){
+    free(place->path);
+    free(place->priority);
+    free(place);
+}
+
 int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, int road, int choice){
     // decode the choice to color
     choice = -choice -10;
@@ -598,28 +604,61 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
 }
 
 int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
+    int pos_ev;
+    for(int i=0; i<10; i++){
+        if(toplace[i] != NULL && toplace[i] == current_ev){
+            pos_ev = i;
+        }
+    }
+    
     int j = -1;
     float ev_found = -1;
     for(int i=0; i<10; i++){
         if(toplace[i] != NULL && // found a better one
-            toplace[i]->ev <= current_ev->ev &&
             toplace[i]->ev > ev_found &&
-            toplace[i] != current_ev)
+            toplace[i] != current_ev &&
+            (toplace[i]->ev < current_ev->ev || (toplace[i]->ev == current_ev->ev && i > pos_ev)))
             { 
             j = i;
             ev_found = toplace[i]->ev;
         }
     }
-    if(j == -1){
-        printf("AAAAA\nAAAAA\nAAAAA\nERROR IN FIND_NEXT_MAX_EV : VALUE NOT FOUND");
-        return -1;
-    }
+    // returns -1 if nothing found (used in update_to_place_len, maybe somewhee else)
     return j; // all good
 }
 
-void update_To_place_len(To_Place** toplace, Board* bord){
+void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
 
-    for(int i=0; i<10; i++){ // for all the elements in toplace
-
+    To_Place* place = toplace[find_max_ev(toplace)];
+    To_Place* temp;
+    int i;
+    while(find_next_max_ev(toplace, place) != -1){ //iterate on all items in toplace.
+        i = 0;
+        // find the length for this one
+        temp = shortest(bord, place->city1, place->city2);
+        place->length_est = 0;
+        place->length_est = temp->nbwagons;
+        while(temp->path[i] != -1){
+            bord->MatRoute[temp->path[i]][temp->path[i+1]].taken = 0; // fill up matrix to pretend the road is taken (is actually free)
+            bord->MatRoute[temp->path[i+1]][temp->path[i]].taken = 0;
+            i+=2;
+        }
+        destroy_place(temp); // to check !
+        place = toplace[find_next_max_ev(toplace, place)];
     }
+    //needs to do the last one. (we stop when there is no next one)
+    i = 0;
+    temp = shortest(bord, place->city1, place->city2);
+    place->length_est = 0;
+    place->length_est = temp->nbwagons;
+    while(temp->path[i] != -1){
+        bord->MatRoute[temp->path[i]][temp->path[i+1]].taken = 0;
+        bord->MatRoute[temp->path[i+1]][temp->path[i]].taken = 0;
+        i+=2;
+    }
+    destroy_place(temp);
+    i = 0;
+
+    // free up the roads we pretended to own
+    return;
 }

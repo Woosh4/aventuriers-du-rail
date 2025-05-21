@@ -77,6 +77,8 @@ int find_max_ev(To_Place** toplace);
 
 void destroy_toplace(To_Place** toplace, Player_Info* info);
 
+void destroy_place(To_Place* place);
+
 /* updates priority in the toplace array for each road
 currently: roads with a set color first, the the others*/
 void update_priority(Board* bord, Player_Info* info, To_Place** toplace);
@@ -107,5 +109,8 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
 
 /* finds the next maximum ev and returns the associate position in the toplace array*/
 int find_next_max_ev(To_Place** toplace, To_Place* current_ev);
+
+/* updates the estimate length of each path, we assume the paths of lower priority have been taken following a dijkstra shortest path.*/
+void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info);
 
 #endif
