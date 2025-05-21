@@ -597,17 +597,29 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
     return joker;
 }
 
-To_Place* find_next_priority(To_Place** toplace, int priority){
+int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
+    int j = -1;
+    float ev_found = -1;
     for(int i=0; i<10; i++){
-        if(toplace[i]->priority == priority+1) return toplace[i];
+        if(toplace[i] != NULL && // found a better one
+            toplace[i]->ev <= current_ev->ev &&
+            toplace[i]->ev > ev_found &&
+            toplace[i] != current_ev)
+            { 
+            j = i;
+            ev_found = toplace[i]->ev;
+        }
     }
-    printf("AAAAA\nAAAAA\nAAAAA\nERROR FIND NEXT PRIORITY : NOT FOUND");
-    return NULL;
+    if(j == -1){
+        printf("AAAAA\nAAAAA\nAAAAA\nERROR IN FIND_NEXT_MAX_EV : VALUE NOT FOUND");
+        return -1;
+    }
+    return j; // all good
 }
 
 void update_To_place_len(To_Place** toplace, Board* bord){
 
     for(int i=0; i<10; i++){ // for all the elements in toplace
-        
+
     }
 }
