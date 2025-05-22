@@ -217,6 +217,8 @@ void init_board(Board* bord){
 void destroy_board(Board* bord){
     free(bord->cards_pickable);
     destroy_matrice_route(bord->MatRoute, bord->gamedata->nbCities);
+    free(bord->gamedata->gameName);
+    free(bord->gamedata->trackData);
     free(bord->gamedata);
     free(bord);
 }
@@ -328,6 +330,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
         city = find_min(dijkstra, bord->gamedata->nbCities);
         if(city == -1){ // the city is blocked and unreachable. too bad..
             free(dijkstra);
+            destroy_place(toplace);
             return NULL;
         }
         dijkstra[city].checked = 1;
@@ -410,12 +413,14 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
             // if the 2 cities are already connected do not add them to toplace. (reset)
             // same if one of them is blocked off
             if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
-                free(toplace[index]->path);
-                free(toplace[index]->priority);
-                free(toplace[index]);
+                destroy_place(toplace[index]);
                 index--;
             }
         index++;
+        }
+
+        else{
+            destroy_place(toplace[index]);
         }
     }
     //add empty to fill up
@@ -599,8 +604,10 @@ void destroy_toplace(To_Place** toplace, Player_Info* info){
 }
 
 void destroy_place(To_Place* place){
-    free(place->path);
-    free(place->priority);
+    if(place != NULL){
+        free(place->path);
+        free(place->priority);
+    }
     free(place);
 }
 
