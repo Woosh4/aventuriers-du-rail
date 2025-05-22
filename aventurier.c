@@ -50,6 +50,11 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
     int NBGAMES = 1; //number of games to play for the loop
+    int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
+    int win_cpt = 0; // needed by PRINT_WINRATE_FILE
+    int lost_cpt = 0; // needed by PRINT_WINRATE_FILE
+    int PRINT_INFO = 1;
+    if(!PRINT_INFO) DEBUG_LEVEL = NO_DEBUG;
 
     //file to extract the objectives and their points
     // FILE* file_objectives = fopen("objectives.txt","w");
@@ -57,11 +62,11 @@ int main(){
 
     Board* board = alloc_board();
 
-    printf("Allocs OK\n");
+    if(PRINT_INFO) printf("Allocs OK\n");
 
     // connect v2
     int connect = connectToCGS("82.29.170.160", 15001, "Alexisv45");
-    printf("connected? : code %d\n", connect);
+    if(PRINT_INFO) printf("connected? : code %d\n", connect);
 
     //LOOP TO PLAY MULTIPLE GAMES
     for(int nbgame=0; nbgame<NBGAMES; nbgame++){
@@ -73,7 +78,15 @@ int main(){
     // sendGameSettings("TOURNAMENT Test", board->gamedata);
     //créer le tournoi sur le web
     //sendGameSettings("TRAINING NICE_BOT seed=123 start=0 delay=0" map=small, board->gamedata);
-    printf("Game settings sent\n");
+    if(PRINT_INFO) printf("Game settings sent\n");
+
+    if(PRINT_WINRATE_FILE){
+        // store the seed in winrate.txt : useful for debug. will add win/loss/winrate at the end of the game
+        FILE* file_winrate = fopen("winrate.txt", "w");
+        if(win_cpt||lost_cpt) fprintf(file_winrate, "SEED: %d, WON: %d, LOST:%d, WINRATE: %f %%",board->gamedata->gameSeed, win_cpt, lost_cpt, 100*(float)win_cpt/(float)(win_cpt+lost_cpt));
+        else fprintf(file_winrate, "SEED: %d, WON: %d, LOST:%d",board->gamedata->gameSeed, win_cpt, lost_cpt);
+        fclose(file_winrate); // close and reopen to keep the seed in case of seg fault
+    }
 
     init_board(board);
     Player_Info* info_p0 = init_player_info(0);
@@ -81,7 +94,7 @@ int main(){
 
     init_tab_cards(info_p0, board);
  
-    printf("init OK");
+    if(PRINT_INFO) printf("init OK");
 
     /* jeu bot*/
     while(1){
@@ -101,7 +114,7 @@ int main(){
         }
         
         //main loop body
-        printBoard();
+        if(PRINT_INFO) printBoard();
         // bot_dumb1(board, info_p0);
         bot_2(board, info_p0);
         if(info_p0->moveresult->state) break;
@@ -148,19 +161,30 @@ int main(){
     //     }
     // }
 
-
-    // for(int bla=0; bla<info_p0->nbobjective; bla++){
-    //     fprintf(file_objectives, "%d %d %d\n", info_p0->objective[bla]->from,info_p0->objective[bla]->to,info_p0->objective[bla]->score);
-    // }
+    if(PRINT_WINRATE_FILE){ // keeps track of games won/lost
+        if(info_p0->moveresult->state != 0){
+            if(info_p0->moveresult->state == 1) win_cpt++;
+            else lost_cpt++;
+        }
+        else if(info_p1->moveresult->state != 0){
+            if(info_p1->moveresult->state == 1) lost_cpt++;
+            else win_cpt++;
+        }
+    }
 
     destroy_player_info(info_p0);
     destroy_player_info(info_p1);
 
+    if(PRINT_WINRATE_FILE){
+        FILE * file_winrate = fopen("winrate.txt", "w");
+        fprintf(file_winrate, "SEED: %d, WON: %d, LOST:%d, WINRATE: %f %%",board->gamedata->gameSeed, win_cpt, lost_cpt, 100*(float)win_cpt/(float)(win_cpt+lost_cpt));
+        fclose(file_winrate);
+    }
+
     } //end of the loop to play multiple games
 
-    // fclose(file_objectives);
     int quit = quitGame();
-    printf("Quit Game : code %d\n",quit);
+    if(PRINT_INFO) printf("Quit Game : code %d\n",quit);
 
     destroy_board(board);
     

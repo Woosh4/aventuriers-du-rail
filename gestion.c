@@ -628,6 +628,7 @@ int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
 }
 
 void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
+    if(toplace == NULL || toplace[0] == NULL) return;
 
     To_Place* place = toplace[find_max_ev(toplace)];
     To_Place* temp;
@@ -657,7 +658,18 @@ void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
         i+=2;
     }
     destroy_place(temp);
-    i = 0;
+    place = toplace[find_max_ev(toplace)];
+
+    for(int j=0; j<10; j++){
+        i = 0;
+        if(toplace[j] != NULL){
+            while(toplace[j]->path[i] != -1){
+                bord->MatRoute[toplace[j]->path[i]][toplace[j]->path[i+1]].taken = -1; // reset the matrix
+                bord->MatRoute[toplace[j]->path[i+1]][toplace[j]->path[i]].taken = -1;
+                i+=2;
+            }
+        }
+    }
 
     // free up the roads we pretended to own
     return;

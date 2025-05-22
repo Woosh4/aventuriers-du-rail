@@ -22,16 +22,16 @@ void bot_2(Board* bord, Player_Info* info){
     //init toplace
     int replay = 0;
     To_Place** toplace = To_place_create(bord, info);
-    update_To_place_len(toplace, bord, info);
+    // update_To_place_len(toplace, bord, info); // to test : probably not to be placed here
 
-    //if no objective left pick 3 more TO BE CHANGED ---------------
+    //if no objective left pick 1 more TO BE CHANGED ---------------
     if(toplace[0] == NULL){
         info->movedata->action = 4;
         sendMove(info->movedata,info->moveresult);
         info->movedata->action = 5;
         info->movedata->chooseObjectives[0] = 1;
-        info->movedata->chooseObjectives[1] = 1;
-        info->movedata->chooseObjectives[2] = 1;
+        info->movedata->chooseObjectives[1] = 0;
+        info->movedata->chooseObjectives[2] = 0;
         sendMove(info->movedata,info->moveresult);
         update_player_info(info, bord);
         destroy_toplace(toplace, info);
