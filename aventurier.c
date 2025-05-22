@@ -50,7 +50,7 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
     int NBGAMES = 1; //number of games to play for the loop
-    int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
+    int PRINT_WINRATE_FILE = 0; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int win_cpt = 0; // needed by PRINT_WINRATE_FILE
     int lost_cpt = 0; // needed by PRINT_WINRATE_FILE
     int PRINT_INFO = 1;
@@ -71,13 +71,13 @@ int main(){
     //LOOP TO PLAY MULTIPLE GAMES
     for(int nbgame=0; nbgame<NBGAMES; nbgame++){
 
-    sendGameSettings("TRAINING NICE_BOT", board->gamedata);
+    sendGameSettings("TRAINING NICE_BOT seed=16717173", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
     //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);
     // sendGameSettings("TOURNAMENT Test", board->gamedata);
     //créer le tournoi sur le web
-    //sendGameSettings("TRAINING NICE_BOT seed=123 start=0 delay=0" map=small, board->gamedata);
+    //sendGameSettings("TRAINING NICE_BOT seed=16717173 start=0 delay=0" map=small, board->gamedata);
     if(PRINT_INFO) printf("Game settings sent\n");
 
     if(PRINT_WINRATE_FILE){

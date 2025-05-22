@@ -326,6 +326,10 @@ To_Place* shortest(Board* bord, int city1, int city2){
     //main loop
     while(!(all_checked(dijkstra, bord)) && dijkstra[city2].checked == 0){
         city = find_min(dijkstra, bord->gamedata->nbCities);
+        if(city == -1){ // the city is blocked and unreachable. too bad..
+            free(dijkstra);
+            return NULL;
+        }
         dijkstra[city].checked = 1;
         for(int i=0; i<bord->gamedata->nbCities; i++){
             if(bord->MatRoute[city][i].length > 0){
@@ -371,7 +375,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
 void print_toplace(To_Place** toplace){
     int j;
     printf("----------\nDEBUG: PRINT TOPLACE\n----------\n");
-    for(int i=0; i<10; i++){
+    for(int i=0; i<20; i++){
         j = 0;
         if(toplace[i] != NULL){ // check if toplace[i] is null
         printf("FROM: %d TO: %d NBWAGONS: %d EV: %f\n", toplace[i]->city1, toplace[i]->city2, toplace[i]->nbwagons, toplace[i]->ev);
@@ -396,26 +400,31 @@ void print_toplace(To_Place** toplace){
 }
 
 To_Place** To_place_create(Board* bord, Player_Info* info){
-    To_Place** toplace = malloc(10 * sizeof(To_Place*));
+    To_Place** toplace = malloc(20 * sizeof(To_Place*));
     int index = 0;
     //add objective roads
     for(int i=0; i<info->nbobjective; i++){
         toplace[index] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
-        toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[index]->nbwagons);
-        // if the 2 cities are already connected do not add them to toplace. (reset)
-        // same if one of them is blocked off
-        if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
-            free(toplace[index]->path);
-            free(toplace[index]->priority);
-            free(toplace[index]);
-            index--;
-        }
+        if(toplace[index] != NULL){
+            toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[index]->nbwagons);
+            // if the 2 cities are already connected do not add them to toplace. (reset)
+            // same if one of them is blocked off
+            if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
+                free(toplace[index]->path);
+                free(toplace[index]->priority);
+                free(toplace[index]);
+                index--;
+            }
         index++;
+        }
     }
     //add empty to fill up
-    for(int i=index; i<10; i++){
+    for(int i=index; i<20; i++){
         toplace[i] = NULL;
     }
+
+    // update_To_place_len(toplace, bord, info); // add the estimate distance
+
     return toplace;
 }
 
@@ -423,7 +432,7 @@ void update_priority(Board* bord, Player_Info* info, To_Place** toplace){
     int priority;
     int j;
 
-    for(int i=0; i<10; i++){
+    for(int i=0; i<20; i++){
         j = 0;
         priority = 0;
         
@@ -522,8 +531,8 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
                 if(bord->cards_pickable->card[j] == color2) return color2;
             }
 
-            //can't pick a visible card, try with a joker
-            if(!pick){
+            //can't pick a visible card, try with a joker, but only if we have more cards than wagons : to ensure we don't waste those jokers early
+            if(!pick && info->nbcards >= info->nbwagons){
                 if(info->cards[color1] + info->cards[9] >= bord->MatRoute[city1][city2].length) return (-color1 -10);
                 if((color2 != 0 && (info->cards[color2] + info->cards[9])) >= bord->MatRoute[city1][city2].length) return (-color2 -10);
             }
@@ -562,7 +571,7 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
 int find_max_ev(To_Place** toplace){
     float max = -1;
     int i = -1;
-    for(int j=0; j<10; j++){ // 10 toplace in the array
+    for(int j=0; j<20; j++){ // 20 toplace in the array
         if(toplace[j] != NULL){
             if(toplace[j]->ev > max){
                 max = toplace[j]->ev;
@@ -605,7 +614,7 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
 
 int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
     int pos_ev;
-    for(int i=0; i<10; i++){
+    for(int i=0; i<20; i++){
         if(toplace[i] != NULL && toplace[i] == current_ev){
             pos_ev = i;
         }
@@ -613,7 +622,7 @@ int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
     
     int j = -1;
     float ev_found = -1;
-    for(int i=0; i<10; i++){
+    for(int i=0; i<20; i++){
         if(toplace[i] != NULL && // found a better one
             toplace[i]->ev > ev_found &&
             toplace[i] != current_ev &&
@@ -633,15 +642,27 @@ void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
     To_Place* place = toplace[find_max_ev(toplace)];
     To_Place* temp;
     int i;
+    // make a copy of the route matrix
+    route** mat_copy = allouer_matrice_route(bord->gamedata->nbCities);
+    for(int cpt1=0; cpt1< bord->gamedata->nbCities; cpt1++){
+        for(int cpt2=0; cpt2< bord->gamedata->nbCities; cpt2++){
+            mat_copy[cpt1][cpt2] = bord->MatRoute[cpt1][cpt2];
+        }
+    }
+    // make a copy of Board in order to use the shortest function
+    Board bord_copy;
+    bord_copy.gamedata = bord->gamedata;
+    bord_copy.MatRoute = mat_copy;
+
     while(find_next_max_ev(toplace, place) != -1){ //iterate on all items in toplace.
         i = 0;
         // find the length for this one
-        temp = shortest(bord, place->city1, place->city2);
+        temp = shortest(&bord_copy, place->city1, place->city2);
         place->length_est = 0;
         place->length_est = temp->nbwagons;
         while(temp->path[i] != -1){
-            bord->MatRoute[temp->path[i]][temp->path[i+1]].taken = 0; // fill up matrix to pretend the road is taken (is actually free)
-            bord->MatRoute[temp->path[i+1]][temp->path[i]].taken = 0;
+            mat_copy[temp->path[i]][temp->path[i+1]].taken = 0; // fill up matrix to pretend the road is taken (is actually free)
+            mat_copy[temp->path[i+1]][temp->path[i]].taken = 0;
             i+=2;
         }
         destroy_place(temp); // to check !
@@ -653,24 +674,12 @@ void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
     place->length_est = 0;
     place->length_est = temp->nbwagons;
     while(temp->path[i] != -1){
-        bord->MatRoute[temp->path[i]][temp->path[i+1]].taken = 0;
-        bord->MatRoute[temp->path[i+1]][temp->path[i]].taken = 0;
+        mat_copy[temp->path[i]][temp->path[i+1]].taken = 0;
+        mat_copy[temp->path[i+1]][temp->path[i]].taken = 0;
         i+=2;
     }
     destroy_place(temp);
-    place = toplace[find_max_ev(toplace)];
+    destroy_matrice_route(mat_copy, bord->gamedata->nbCities);
 
-    for(int j=0; j<10; j++){
-        i = 0;
-        if(toplace[j] != NULL){
-            while(toplace[j]->path[i] != -1){
-                bord->MatRoute[toplace[j]->path[i]][toplace[j]->path[i+1]].taken = -1; // reset the matrix
-                bord->MatRoute[toplace[j]->path[i+1]][toplace[j]->path[i]].taken = -1;
-                i+=2;
-            }
-        }
-    }
-
-    // free up the roads we pretended to own
     return;
 }
