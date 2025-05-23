@@ -314,6 +314,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
     toplace->city1 = city1;
     toplace->city2 = city2;
     toplace->nbwagons = 0;
+    toplace->points_place = 0;
 
     //init checked + weight
     Dijkstra_City* dijkstra = malloc(bord->gamedata->nbCities * sizeof(Dijkstra_City));
@@ -340,8 +341,6 @@ To_Place* shortest(Board* bord, int city1, int city2){
             }
         }
     }
-    // IMPORTANT: add anti blocked for city n°0 (of origin?)
-    // detect if weight of city2(destination) = -1
 
     //build the full road (from city2 to city1)
     city = city2;
@@ -351,6 +350,7 @@ To_Place* shortest(Board* bord, int city1, int city2){
         if(bord->MatRoute[city][dijkstra[city].prev].taken == -1){ //only add unconnected cities
             toplace->path[i] = city;
             toplace->path[i+1] = dijkstra[city].prev;
+            toplace->points_place += points(bord->MatRoute[i][i+1].length);
             i = i+2;
         }
         city = dijkstra[city].prev;
@@ -409,7 +409,7 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
     for(int i=0; i<info->nbobjective; i++){
         toplace[index] = shortest(bord, info->objective[i]->from, info->objective[i]->to);
         if(toplace[index] != NULL){
-            toplace[index]->ev = (float)(info->objective[i]->score) / (float)(toplace[index]->nbwagons);
+            toplace[index]->ev = ev_calculate(info, toplace[index], i);
             // if the 2 cities are already connected do not add them to toplace. (reset)
             // same if one of them is blocked off
             if(toplace[index]->nbwagons == 0 || toplace[index]->nbwagons > 100){
@@ -428,7 +428,7 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
         toplace[i] = NULL;
     }
 
-    // update_To_place_len(toplace, bord, info); // add the estimate distance
+    update_To_place_len(toplace, bord, info); // add the estimate distance
 
     return toplace;
 }
@@ -689,4 +689,34 @@ void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
     destroy_matrice_route(mat_copy, bord->gamedata->nbCities);
 
     return;
+}
+
+int points(int len){
+    switch(len){
+        case 1:
+        return 1;
+    
+        case 2:
+        return 2;
+
+        case 3:
+        return 4;
+
+        case 4:
+        return 7;
+
+        case 5:
+        return 10;
+
+        case 6:
+        return 15;
+    }
+}
+
+float ev_calculate(Player_Info* info, To_Place* place, int obj_number){
+    float points_road = (float)place->points_place; // points for placing roads
+    float obj_points = (float)info->objective[obj_number]->score; // points from the objective
+    float length = (float)place->nbwagons;
+
+    return (points_road+obj_points)/length;
 }

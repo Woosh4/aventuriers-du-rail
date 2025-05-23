@@ -113,4 +113,9 @@ int find_next_max_ev(To_Place** toplace, To_Place* current_ev);
 /* updates the estimate length of each path, we assume the paths of lower priority have been taken following a dijkstra shortest path.*/
 void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info);
 
+/* returns the number of points for a route of length len*/
+int points(int len);
+
+/* calculate the expected value. obj_place is the position of the objective in the array*/
+float ev_calculate(Player_Info* info, To_Place* place, int obj_place);
 #endif
