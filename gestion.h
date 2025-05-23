@@ -122,6 +122,15 @@ float ev_calculate(Player_Info* info, To_Place* place, int obj_place);
 /* calculate ev from moveresult, to evaluate the objectives we just picked*/
 float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number);
 
+/* calculate the EV based on the estimate length of the picked objectives*/
+float ev_estimate_result(Player_Info* info, To_Place* place, int obj_number_result);
+
+/* returns the max between the 2, if index==1 then return the index of the max*/
+float max2(float val1, float val2, int index);
+
+/* returns the max between the 3, if index==1 then return the index of the max*/
+float max3(float val1, float val2, float val3, int index);
+
 /* chooses new objectives depending on their estimate ev*/
 void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord);
 

@@ -728,10 +728,32 @@ float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_res
     return (points_road+obj_points)/length;
 }
 
-float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_result){
+float max3(float val1, float val2, float val3, int index){
+    if(val1 >= val2 && val1 >= val3){
+        if(index) return 0;
+        return val1;
+    }
+    if(val2 >= val1 && val2 >= val3){
+        if(index) return 1;
+        return val2;
+    }
+    if(index) return 2;
+    return val3;
+}
+
+float max2(float val1, float val2, int index){
+    if(val1 >= val2){
+        if(index) return 0;
+        return val1;
+    }
+    if(index) return 1;
+    return val2;
+}
+
+float ev_estimate_result(Player_Info* info, To_Place* place, int obj_number_result){
     float points_road = (float)place->points_place; // points for placing roads
     float obj_points = (float)info->moveresult->objectives[obj_number_result].score; // points from the objective
-    float length = (float)place->nbwagons;
+    float length = (float)place->length_est;
 
     return (points_road+obj_points)/length;
 }
@@ -744,7 +766,7 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
     // make copy of toplace (there should not be anything in there but just in case)
     To_Place** toplace_copy = malloc(20* sizeof(To_Place*));
     int index = 0;
-    int obj_cpt = 0;
+    int index_backup;
     while(toplace[index] != NULL){
         toplace_copy[index] = malloc(sizeof(To_Place));
         toplace_copy[index] = *(&toplace[index]);
@@ -752,20 +774,41 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
     }
     // fill up the rest with NULL
     for(int i=19; i>=index; i--) toplace_copy[i] = NULL;
+    index_backup = index;
 
     for(int j=0; j<3; j++){
-        toplace_copy[index] = shortest(bord, info->moveresult->objectives[obj_cpt].from, info->moveresult->objectives[obj_cpt].to);
+        toplace_copy[index] = shortest(bord, info->moveresult->objectives[j].from, info->moveresult->objectives[j].to);
         if(toplace_copy[index] != NULL){
-            toplace_copy[index]->ev = ev_calculate_result(info, toplace_copy[index], 0);
+            toplace_copy[index]->ev = ev_calculate_result(info, toplace_copy[index], j);
             index++;
         }
-        obj_cpt++;
     }
     toplace_copy[index] = NULL;
 
     // calculate estimate distances
     update_To_place_len(toplace_copy, bord, info);
+
+    // calculate the estimated EVs
+    index = index_backup;
+    float est_ev0 = ev_estimate_result(info, toplace_copy[index], 0);
+    float est_ev1 = ev_estimate_result(info, toplace_copy[index+1], 1);
+    float est_ev2 = ev_estimate_result(info, toplace_copy[index+2], 2);
+
+    // always pick the best one (we are forced to pick at least one)
+    int max_ev = (int)max3(toplace_copy[index]->ev,toplace_copy[index+1]->ev,toplace_copy[index+2]->ev,1);
+    info->movedata->chooseObjectives[max_ev] = 1;
+
+    if((float)toplace_copy[max_ev%3 +1]->length_est/(float)toplace_copy[max_ev%3 +1]->nbwagons > 0.8){
+        info->movedata->chooseObjectives[max_ev%3 +1] = 1;
+    }
+    else info->movedata->chooseObjectives[max_ev%3 +1] = 0;
+
+    if((float)toplace_copy[max_ev%3 +2]->length_est/(float)toplace_copy[max_ev%3 +2]->nbwagons > 0.8){
+        info->movedata->chooseObjectives[max_ev%3 +2] = 1;
+    }
+    else info->movedata->chooseObjectives[max_ev%3 +2] = 0;
     
+    // cleanup
     index = 0;
     while(toplace[index] != NULL){
         destroy_place(toplace_copy[index]);
