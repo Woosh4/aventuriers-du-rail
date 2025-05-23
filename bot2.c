@@ -23,10 +23,14 @@ void bot_2(Board* bord, Player_Info* info){
     int replay = 0;
     To_Place** toplace = To_place_create(bord, info);
 
+
     //if no objective left pick 1 more TO BE CHANGED ---------------
     if(toplace[0] == NULL){
         info->movedata->action = 4;
         sendMove(info->movedata,info->moveresult);
+
+        pick_new_objectives(toplace, info, bord); // for debugging purposes !!!
+        
         info->movedata->action = 5;
         info->movedata->chooseObjectives[0] = 1;
         info->movedata->chooseObjectives[1] = 0;

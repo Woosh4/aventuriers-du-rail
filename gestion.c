@@ -427,7 +427,6 @@ To_Place** To_place_create(Board* bord, Player_Info* info){
     for(int i=index; i<20; i++){
         toplace[i] = NULL;
     }
-
     update_To_place_len(toplace, bord, info); // add the estimate distance
 
     return toplace;
@@ -677,7 +676,7 @@ void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info){
     }
     //needs to do the last one. (we stop when there is no next one)
     i = 0;
-    temp = shortest(bord, place->city1, place->city2);
+    temp = shortest(&bord_copy, place->city1, place->city2);
     place->length_est = 0;
     place->length_est = temp->nbwagons;
     while(temp->path[i] != -1){
@@ -719,4 +718,59 @@ float ev_calculate(Player_Info* info, To_Place* place, int obj_number){
     float length = (float)place->nbwagons;
 
     return (points_road+obj_points)/length;
+}
+
+float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_result){
+    float points_road = (float)place->points_place; // points for placing roads
+    float obj_points = (float)info->moveresult->objectives[obj_number_result].score; // points from the objective
+    float length = (float)place->nbwagons;
+
+    return (points_road+obj_points)/length;
+}
+
+float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_result){
+    float points_road = (float)place->points_place; // points for placing roads
+    float obj_points = (float)info->moveresult->objectives[obj_number_result].score; // points from the objective
+    float length = (float)place->nbwagons;
+
+    return (points_road+obj_points)/length;
+}
+
+void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
+    // info->movedata->action = 4;
+    // sendMove(info->movedata,info->moveresult);
+
+    // info->movedata->action = 5;
+    // make copy of toplace (there should not be anything in there but just in case)
+    To_Place** toplace_copy = malloc(20* sizeof(To_Place*));
+    int index = 0;
+    int obj_cpt = 0;
+    while(toplace[index] != NULL){
+        toplace_copy[index] = malloc(sizeof(To_Place));
+        toplace_copy[index] = *(&toplace[index]);
+        index++;
+    }
+    // fill up the rest with NULL
+    for(int i=19; i>=index; i--) toplace_copy[i] = NULL;
+
+    for(int j=0; j<3; j++){
+        toplace_copy[index] = shortest(bord, info->moveresult->objectives[obj_cpt].from, info->moveresult->objectives[obj_cpt].to);
+        if(toplace_copy[index] != NULL){
+            toplace_copy[index]->ev = ev_calculate_result(info, toplace_copy[index], 0);
+            index++;
+        }
+        obj_cpt++;
+    }
+    toplace_copy[index] = NULL;
+
+    // calculate estimate distances
+    update_To_place_len(toplace_copy, bord, info);
+    
+    index = 0;
+    while(toplace[index] != NULL){
+        destroy_place(toplace_copy[index]);
+        index++;
+    }
+    free(toplace_copy);
+    return;
 }

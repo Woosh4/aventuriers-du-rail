@@ -118,4 +118,11 @@ int points(int len);
 
 /* calculate the expected value. obj_place is the position of the objective in the array*/
 float ev_calculate(Player_Info* info, To_Place* place, int obj_place);
+
+/* calculate ev from moveresult, to evaluate the objectives we just picked*/
+float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number);
+
+/* chooses new objectives depending on their estimate ev*/
+void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord);
+
 #endif
