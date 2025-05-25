@@ -64,8 +64,8 @@ int all_checked(Dijkstra_City* array, Board* bord);
 /* updates the distance of city2 if the route through city1 is shorter*/
 void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord);
 
-/* returns the shortest path between city1 and city2*/
-To_Place* shortest(Board* bord, int city1, int city2);
+/* returns the shortest path between city1 and city2. blocked is set to 1 if the city can't be connected*/
+To_Place* shortest(Board* bord, int city1, int city2, int* blocked);
 
 void print_toplace(To_Place** toplace);
 
@@ -110,7 +110,8 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
 /* finds the next maximum ev and returns the associate position in the toplace array*/
 int find_next_max_ev(To_Place** toplace, To_Place* current_ev);
 
-/* updates the estimate length of each path, we assume the paths of lower priority have been taken following a dijkstra shortest path.*/
+/* IS THE EV UPDATED TO ESTIMATE EV DURING THE LOOP ?
+updates the estimate length of each path, we assume the paths of lower priority have been taken following a dijkstra shortest path.*/
 void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info);
 
 /* returns the number of points for a route of length len*/
@@ -131,7 +132,7 @@ float max2(float val1, float val2, int index);
 /* returns the max between the 3, if index==1 then return the index of the max*/
 float max3(float val1, float val2, float val3, int index);
 
-/* chooses new objectives depending on their estimate ev*/
+/* NOT FINISHED : CHECK AMOUNT OF WAGONS REMAINING BEFORE PICKING AN OBJECTIVE, chooses new objectives depending on their estimate ev*/
 void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord);
 
 #endif

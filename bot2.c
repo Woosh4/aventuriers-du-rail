@@ -6,18 +6,18 @@ void bot_2(Board* bord, Player_Info* info){
     //picks all 3 objectives (to change, with: calculate EV, compare to an average?)
     //TODO IMPORTANT: have an array with all the colors needed to fill an objective ?, to pick cards effectively?
 
-    if(bord->when == -1){
-        bord->when = 0;
-        info->movedata->action = 4;
-        sendMove(info->movedata,info->moveresult);
-        info->movedata->action = 5;
-        info->movedata->chooseObjectives[0] = 1;
-        info->movedata->chooseObjectives[1] = 1;
-        info->movedata->chooseObjectives[2] = 1;
-        sendMove(info->movedata,info->moveresult);
-        update_player_info(info, bord);
-        return;
-    }
+    // if(bord->when == -1){
+    //     bord->when = 0;
+    //     info->movedata->action = 4;
+    //     sendMove(info->movedata,info->moveresult);
+    //     info->movedata->action = 5;
+    //     info->movedata->chooseObjectives[0] = 1;
+    //     info->movedata->chooseObjectives[1] = 1;
+    //     info->movedata->chooseObjectives[2] = 1;
+    //     sendMove(info->movedata,info->moveresult);
+    //     update_player_info(info, bord);
+    //     return;
+    // }
 
     //init toplace
     int replay = 0;
@@ -26,15 +26,15 @@ void bot_2(Board* bord, Player_Info* info){
 
     //if no objective left pick 1 more TO BE CHANGED ---------------
     if(toplace[0] == NULL){
-        info->movedata->action = 4;
-        sendMove(info->movedata,info->moveresult);
+        // info->movedata->action = 4;
+        // sendMove(info->movedata,info->moveresult);
 
-        pick_new_objectives(toplace, info, bord); // for debugging purposes !!!
+        pick_new_objectives(toplace, info, bord);
         
-        info->movedata->action = 5;
-        info->movedata->chooseObjectives[0] = 1;
-        info->movedata->chooseObjectives[1] = 0;
-        info->movedata->chooseObjectives[2] = 0;
+        // info->movedata->action = 5;
+        // info->movedata->chooseObjectives[0] = 1;
+        // info->movedata->chooseObjectives[1] = 0;
+        // info->movedata->chooseObjectives[2] = 0;
         sendMove(info->movedata,info->moveresult);
         update_player_info(info, bord);
         destroy_toplace(toplace, info);
