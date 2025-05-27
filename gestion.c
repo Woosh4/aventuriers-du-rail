@@ -820,42 +820,38 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
     update_To_place_len(toplace_copy, bord, info);
 
     // calculate the estimated EVs
-    int max_ev1 = max3(toplace_copy[0]->ev,toplace_copy[1]->ev,toplace_copy[2]->ev, 1);
-    int mid_ev = (max_ev1+1)%3;
-    if(max2(toplace_copy[(max_ev1+1)%3]->ev, toplace_copy[(max_ev1+2)%3]->ev, 1)) mid_ev = (max_ev1+1)%3;
-    int min_ev = max_ev1^mid_ev^3;
+    int max_ev = max3(toplace_copy[0]->ev,toplace_copy[1]->ev,toplace_copy[2]->ev, 1);
+    int mid_ev = (max_ev+1)%3;
+    if(max2(toplace_copy[(max_ev+1)%3]->ev, toplace_copy[(max_ev+2)%3]->ev, 1)) mid_ev = (max_ev+1)%3;
+    int min_ev = max_ev^mid_ev^3;
 
-
+    int max_ev_est = min_ev; // to know which objective has the highest estimate EV (assuming the max EV is already placed of course!)
+    if(ev_estimate_result(info,toplace_copy[mid_ev],mid_ev >= ev_estimate_result(info,toplace_copy[min_ev],min_ev))){
+        max_ev_est = mid_ev;
+    }
+    
     // always pick the best one : max current ev(we are forced to pick at least one)
-    int max_ev = (int)max3(toplace_copy[0]->ev,toplace_copy[1]->ev,toplace_copy[2]->ev,1);
     info->movedata->chooseObjectives[max_ev] = 1;
-    wagon_cpt -= toplace_copy[max_ev]->nbwagons;
+    wagon_cpt -= toplace_copy[max_ev]->length_est; // estimate of how much wagons we will have once the path is completed
+    // !! length_est is a bit risky. maybe nbwagons is safer
 
-    max_ev = (max_ev+1)%3; // point towards the next index
-    // if ev_estimate / ev_actual > 1.2 we deem the objective worthy : we pick it. + if we have enough wagons
-    if(ev_estimate_result(info, toplace_copy[max_ev], max_ev)/(float)toplace_copy[max_ev]->nbwagons > 1.2
-        && wagon_cpt - toplace_copy[max_ev]->length_est >= 8
-        ){
-        info->movedata->chooseObjectives[max_ev] = 1;
-        wagon_cpt -= toplace_copy[max_ev]->length_est;
+    // take the second best one if we have enough wagons (no check on EV_est value for now)
+    if(wagon_cpt - toplace_copy[max_ev_est]->length_est >= 8){
+        info->movedata->chooseObjectives[max_ev_est] = 1;
+        wagon_cpt -= toplace_copy[max_ev_est]->length_est;
     }
-    else info->movedata->chooseObjectives[max_ev] = 0;
 
-    max_ev = (max_ev+1)%3; // point towards the next index
-    // if ev_estimate / ev_actual > 1.2 we deem the objective worthy : we pick it
-    if(ev_estimate_result(info, toplace_copy[max_ev], max_ev)/(float)toplace_copy[max_ev]->nbwagons > 1.2
-        && wagon_cpt - toplace_copy[max_ev]->length_est >= 8
-        ){
-        info->movedata->chooseObjectives[max_ev] = 1;
-        wagon_cpt -= toplace_copy[max_ev]->length_est;
+    // same for the third one
+    if(wagon_cpt - toplace_copy[max_ev^max_ev_est^3]->length_est >= 8){
+        info->movedata->chooseObjectives[max_ev^max_ev_est^3] = 1;
+        wagon_cpt -= toplace_copy[max_ev^max_ev_est^3]->length_est;
     }
-    else info->movedata->chooseObjectives[max_ev] = 0;
 
-    // if at the beginning of the game : make sure we take at least 2, max current ev and max estimated ev
+    // if at the beginning of the game : make sure we take at least 2, max current ev and max estimated ev. (should be always OK but we never know..)
     if(bord->when == -1){
         bord->when = 0;
-        max_ev = (max_ev+1)%3; // back on the actual max ev
-        info->movedata->chooseObjectives[(max_ev+1)%3] = 1; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! not good yet !!
+        info->movedata->chooseObjectives[max_ev] = 1;
+        info->movedata->chooseObjectives[max_ev_est] = 1;
     }
     
     // cleanup

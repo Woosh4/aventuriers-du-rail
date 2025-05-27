@@ -34,7 +34,7 @@ int main(){
     //LOOP TO PLAY MULTIPLE GAMES
     for(int nbgame=0; nbgame<NBGAMES; nbgame++){
 
-    if(!TOURNAMENT_TEST) sendGameSettings("TRAINING NICE_BOT seed=16522048", board->gamedata);
+    if(!TOURNAMENT_TEST) sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     else sendGameSettings("TOURNAMENT Test", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
