@@ -43,6 +43,7 @@ typedef struct{
     // path : [city1, city2, city2, city3, ...,cityx, -1, -1]= road from 1→2 then 2→3
     int points_place; // points from road placements : used for EV
     int length_est; // estimate of the length of the path (in nb wagons) : we assume the paths with a lower priority are already taken.
+    int* col; // array with how much of each color we need to build the path
 }To_Place;
 
 typedef struct{

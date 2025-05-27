@@ -311,6 +311,8 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
     toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
     toplace->priority = malloc(bord->gamedata->nbCities * sizeof(int));
     for(int i=0; i<bord->gamedata->nbCities; i++) toplace->priority[i] = -1;
+    toplace->col = malloc(10* sizeof(int));
+    for(int i=0; i<10; i++) toplace->col[i] = 0;
     toplace->city1 = city1;
     toplace->city2 = city2;
     toplace->nbwagons = 0;
@@ -352,6 +354,12 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
             toplace->path[i] = city;
             toplace->path[i+1] = dijkstra[city].prev;
             toplace->points_place += points(bord->MatRoute[i][i+1].length);
+            if(bord->MatRoute[dijkstra[city].prev][city].color != 9){ // if road has a color
+                toplace->col[bord->MatRoute[dijkstra[city].prev][city].color] += bord->MatRoute[dijkstra[city].prev][city].length; // add the length to the color count
+                if(bord->MatRoute[dijkstra[city].prev][city].color2 != 0){ // road also has a second color
+                    toplace->col[bord->MatRoute[dijkstra[city].prev][city].color2] += bord->MatRoute[dijkstra[city].prev][city].length;
+                }
+            }
             i = i+2;
         }
         city = dijkstra[city].prev;
@@ -598,6 +606,7 @@ void destroy_toplace(To_Place** toplace, Player_Info* info){
         if(toplace[i] != NULL){
             free(toplace[i]->path);
             free(toplace[i]->priority);
+            free(toplace[i]->col);
             free(toplace[i]);
         }
     }
@@ -608,6 +617,7 @@ void destroy_place(To_Place* place){
     if(place != NULL){
         free(place->path);
         free(place->priority);
+        if(place->col) free(place->col);
     }
     free(place);
 }
@@ -801,6 +811,7 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
             toplace_copy[j]->nbwagons = 1;
             toplace_copy[j]->path = malloc(sizeof(int)); // not used : just to conform with the destroy function
             toplace_copy[j]->priority = malloc(sizeof(int));
+            toplace_copy[j]->col = malloc(sizeof(int));
         }
     }
     toplace_copy[3] = NULL;
@@ -809,9 +820,10 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
     update_To_place_len(toplace_copy, bord, info);
 
     // calculate the estimated EVs
-    float est_ev0 = ev_estimate_result(info, toplace_copy[0], 0);
-    float est_ev1 = ev_estimate_result(info, toplace_copy[1], 1);
-    float est_ev2 = ev_estimate_result(info, toplace_copy[2], 2);
+    int max_ev1 = max3(toplace_copy[0]->ev,toplace_copy[1]->ev,toplace_copy[2]->ev, 1);
+    int mid_ev = (max_ev1+1)%3;
+    if(max2(toplace_copy[(max_ev1+1)%3]->ev, toplace_copy[(max_ev1+2)%3]->ev, 1)) mid_ev = (max_ev1+1)%3;
+    int min_ev = max_ev1^mid_ev^3;
 
 
     // always pick the best one : max current ev(we are forced to pick at least one)

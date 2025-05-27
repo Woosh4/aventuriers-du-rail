@@ -110,7 +110,7 @@ int find_nb_joker(Board* bord, Player_Info* info, To_Place** toplace, int max, i
 /* finds the next maximum ev and returns the associate position in the toplace array*/
 int find_next_max_ev(To_Place** toplace, To_Place* current_ev);
 
-/* IS THE EV UPDATED TO ESTIMATE EV DURING THE LOOP ?
+/* small problem : ev is not recalculated between each step (not a big issue in most cases)
 updates the estimate length of each path, we assume the paths of lower priority have been taken following a dijkstra shortest path.*/
 void update_To_place_len(To_Place** toplace, Board* bord, Player_Info* info);
 

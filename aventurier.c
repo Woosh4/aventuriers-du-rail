@@ -2,47 +2,7 @@
 #include <stdlib.h>
 #include "aventurier.h"
 
-
-/* retourne 0 si c'est à moi de jouer, 1 l'autre joueur, 2 si partie finie
-quand : 0: player to play after, 1: bot to play after, 2:start, 3 player played before, 4 bot played before
-
-nop faire matrice de machine à état*/
-
-int a_qui(MoveData* mymove, MoveData* opponent_move, GameData* mygamedata,int* quand){
-    // start of the game
-    printf("*quand = %d\n", *quand);
-    if(*quand == 2){
-        if(mygamedata->starter == 1){
-            *quand = 1;
-            return 1;
-        } 
-        else if(mygamedata->starter == 2){
-            *quand = 0;
-            return 0;
-        }
-    }
-    // play again case
-    if((*quand == 0) && (mymove->action == 4 || mymove->action == 2 || (mymove->action == 3 && mymove->drawCard != 9))){
-        *quand = 1;
-        return 0;
-    }
-    if((*quand == 1) && (opponent_move->action == 4 || opponent_move->action == 2 || (opponent_move->action == 3 && opponent_move->drawCard != 9))){
-        *quand = 0;
-        return 1;
-    }
-    // other's turn to play turn
-    if(*quand == 0){
-        *quand = 1;
-        return 0;
-    }
-    if(*quand == 1){
-        *quand = 0;
-        return 1;
-    }
-    return -1;
-}
-
-/* todo : update when, machine à état pour les tours
+/* todo :
 problem? : can only update board after move has been done
 needs amount of wagons remaining, for bot1, others
 update all*/
@@ -51,7 +11,7 @@ int main(){
     DEBUG_LEVEL = INTERN_DEBUG;
 
     int NBGAMES = 1; //number of games to play for the loop
-    int PRINT_WINRATE_FILE = 0; // to generate a file with : seed of current game, nbgames won, lost, winrate.
+    int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int PRINT_INFO = 1; // toggles debug prints
     int TOURNAMENT_TEST = 0;
 
@@ -68,13 +28,13 @@ int main(){
     if(PRINT_INFO) printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv45");
+    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv49");
     if(PRINT_INFO) printf("connected? : code %d\n", connect);
 
     //LOOP TO PLAY MULTIPLE GAMES
     for(int nbgame=0; nbgame<NBGAMES; nbgame++){
 
-    if(!TOURNAMENT_TEST) sendGameSettings("TRAINING NICE_BOT", board->gamedata);
+    if(!TOURNAMENT_TEST) sendGameSettings("TRAINING NICE_BOT seed=16522048", board->gamedata);
     else sendGameSettings("TOURNAMENT Test", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
