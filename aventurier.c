@@ -11,7 +11,7 @@ int main(){
     DEBUG_LEVEL = INTERN_DEBUG;
 
     int NBGAMES = 1; //number of games to play for the loop
-    int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
+    int PRINT_WINRATE_FILE = 0; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int PRINT_INFO = 1; // toggles debug prints
     int TOURNAMENT_TEST = 0;
 
@@ -28,7 +28,7 @@ int main(){
     if(PRINT_INFO) printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Le_Alexcouille_3000");
+    int connect = connectToCGS("82.29.170.160", 15001, "Le_Alexcouille_2000");
     if(PRINT_INFO) printf("connected? : code %d\n", connect);
 
     //LOOP TO PLAY MULTIPLE GAMES
@@ -57,8 +57,8 @@ int main(){
 
     init_tab_cards(info_p0, board);
  
-    if(PRINT_INFO) printf("init OK");
-    if(PRINT_INFO) printf("Seed = %d", board->gamedata->gameSeed);
+    if(PRINT_INFO) printf("init OK\n");
+    if(PRINT_INFO) printf("Seed = %d\n", board->gamedata->gameSeed);
 
     /* jeu bot*/
     while(1){

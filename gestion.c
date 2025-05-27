@@ -767,7 +767,7 @@ float ev_calculate(Player_Info* info, To_Place* place, int obj_number){
     float length = (float)place->nbwagons;
 
     if(length == 0) return (float)__INT_MAX__;
-    return (points_road+obj_points)/length;
+    return (points_road+2*obj_points)/length;
 }
 
 float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_result){
@@ -852,6 +852,11 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
 
     // calculate estimate distances
     update_To_place_len(toplace_copy, bord, info);
+
+    // set all objectives to not taken as default
+    info->movedata->chooseObjectives[0] = 0;
+    info->movedata->chooseObjectives[1] = 0;
+    info->movedata->chooseObjectives[2] = 0;
 
     // calculate the estimated EVs
     int max_ev = max3(toplace_copy[0]->ev,toplace_copy[1]->ev,toplace_copy[2]->ev, 1);
