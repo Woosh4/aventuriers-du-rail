@@ -28,7 +28,7 @@ int main(){
     if(PRINT_INFO) printf("Allocs OK\n");
 
     // connect v2
-    int connect = connectToCGS("82.29.170.160", 15001, "Alexisv49");
+    int connect = connectToCGS("82.29.170.160", 15001, "Le_Alexcouille_3000");
     if(PRINT_INFO) printf("connected? : code %d\n", connect);
 
     //LOOP TO PLAY MULTIPLE GAMES
@@ -58,6 +58,7 @@ int main(){
     init_tab_cards(info_p0, board);
  
     if(PRINT_INFO) printf("init OK");
+    if(PRINT_INFO) printf("Seed = %d", board->gamedata->gameSeed);
 
     /* jeu bot*/
     while(1){

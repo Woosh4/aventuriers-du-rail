@@ -18,6 +18,7 @@ typedef struct{
     route** MatRoute; // matrix that represents all roads
     GameData* gamedata;
     int when; // =-1 at the begining, otherwise represents whose turn it is to play
+    int gofast; // 1 if we want to expedite the game
 }Board;
 
 /* updated after board*/

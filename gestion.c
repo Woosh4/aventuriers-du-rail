@@ -204,6 +204,7 @@ Board* alloc_board(){
     bord->cards_pickable = malloc(5*sizeof(CardColor));
     bord->gamedata = (GameData*)malloc(sizeof(GameData));
     bord->when = -1;
+    bord->gofast = 0;
     return bord;
 }
 /* init board, to call after alloc_board and sendgamesettings.*/
@@ -211,6 +212,7 @@ void init_board(Board* bord){
     getBoardState(bord->cards_pickable);
     bord->MatRoute = allouer_matrice_route(bord->gamedata->nbCities);
     bord->when = -1;
+    bord->gofast = 0;
     convert_tab_matrice(bord);
 }
 
@@ -266,7 +268,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         if(dijk[city2].weight > dijk[city1].weight){
             dijk[city2].weight = dijk[city1].weight;
             dijk[city2].prev = city1;
-            
+            dijk[city2].color_forced = dijk[city1].color_forced;
         }
         return;
     }
@@ -279,19 +281,20 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
             dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
             dijk[city2].prev = city1;
-            if(bord->MatRoute[city1][city2].color != 9) dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
+            if(bord->MatRoute[city1][city2].color == 9) dijk[city2].color_forced = dijk[city1].color_forced; // no set color : same
+            else dijk[city2].color_forced = dijk[city1].color_forced + bord->MatRoute[city1][city2].length; // has a set color : add the length
         }
         //if both have the same weight, choose the one with the minimum forced colors
         if(dijk[city2].weight == (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
             if(bord->MatRoute[city1][city2].color != 9){ // route has a set color
-                if(dijk[city2].color_forced > (dijk[city1].color_forced + bord->MatRoute[city1][city2].length)){
+                if(dijk[city2].color_forced < (dijk[city1].color_forced + bord->MatRoute[city1][city2].length)){
                     dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
                     dijk[city2].prev = city1;
                     dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
                 }
             }
             else{ // route does not have a set color
-                if(dijk[city2].color_forced > dijk[city1].color_forced){
+                if(dijk[city2].color_forced < dijk[city1].color_forced){
                     dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
                     dijk[city2].prev = city1;
                     dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
@@ -582,6 +585,38 @@ int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int ma
     //5 pick random
 }
 
+int search_color_pick_v2(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick){
+    int city1;
+    int city2;
+    int color1;
+    int color2; // for convenience
+
+    // find all the colors we need and put them in col:
+    int col[10];
+    for(int j=0; j<10; j++) col[j]=0;
+    int i = 0;
+    int gofast; // to expedite the game once we don't have many wagons left
+    while(toplace[i] != NULL){
+        for(int j=0; j<10; j++){
+            col[j] += toplace[i]->col[j];
+        }
+        i++;
+    }
+
+    if(info->nbwagons <= 8) bord->gofast = 1; // check if it is gofast time
+
+    int pos_toplace = find_max_ev(toplace);
+    while(pos_toplace != -1){ // check every To_place in the array, from highest to lowest EV
+        
+
+
+        pos_toplace = find_next_max_ev(toplace, toplace[pos_toplace]);
+    }
+
+
+    return -1; // just to not forget
+}
+
 int find_max_ev(To_Place** toplace){
     float max = -1;
     int i = -1;
@@ -642,8 +677,7 @@ int find_next_max_ev(To_Place** toplace, To_Place* current_ev){
     float ev_found = -1;
     for(int i=0; i<20; i++){
         if(toplace[i] != NULL && // found a better one
-            toplace[i]->ev > ev_found &&
-            toplace[i] != current_ev &&
+            toplace[i]->ev > ev_found && // higher EV than current
             (toplace[i]->ev < current_ev->ev || (toplace[i]->ev == current_ev->ev && i > pos_ev)))
             { 
             j = i;

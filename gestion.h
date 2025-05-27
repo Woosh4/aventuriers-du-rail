@@ -102,6 +102,8 @@ skip road if any color can be used, then comes back later:
 //5 pick random
  */
 int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
+int search_color_pick_v2(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
+
 
 /* returns how many jokers are needed to place the road in toplace[max]->path[road] of specific color.
 color is to be between -11 and -18 for it work properly (convention used in search_color_pick)*/
@@ -132,7 +134,8 @@ float max2(float val1, float val2, int index);
 /* returns the max between the 3, if index==1 then return the index of the max*/
 float max3(float val1, float val2, float val3, int index);
 
-/* NOT FINISHED : CHECK AMOUNT OF WAGONS REMAINING BEFORE PICKING AN OBJECTIVE, chooses new objectives depending on their estimate ev*/
+/*chooses new objectives depending on their estimate ev :
+send a move 4, and prepares a move 5 (not sent)*/
 void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord);
 
 #endif
