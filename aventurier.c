@@ -10,8 +10,8 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
 
-    int NBGAMES = 1; //number of games to play for the loop
-    int PRINT_WINRATE_FILE = 0; // to generate a file with : seed of current game, nbgames won, lost, winrate.
+    int NBGAMES = 1000; //number of games to play for the loop
+    int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int PRINT_INFO = 1; // toggles debug prints
     int TOURNAMENT_TEST = 0;
 

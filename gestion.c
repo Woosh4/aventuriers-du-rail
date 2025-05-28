@@ -269,6 +269,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
             dijk[city2].weight = dijk[city1].weight;
             dijk[city2].prev = city1;
             dijk[city2].color_forced = dijk[city1].color_forced;
+            dijk[city2].points_road = dijk[city1].points_road;
         }
         return;
     }
@@ -278,27 +279,25 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     }
     //route is free to take
     else if(dijk[city2].weight >= (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
+        // less wagons
         if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
             dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
             dijk[city2].prev = city1;
             if(bord->MatRoute[city1][city2].color == 9) dijk[city2].color_forced = dijk[city1].color_forced; // no set color : same
             else dijk[city2].color_forced = dijk[city1].color_forced + bord->MatRoute[city1][city2].length; // has a set color : add the length
+            dijk[city2].points_road = dijk[city1].points_road + points(bord->MatRoute[city1][city2].length); // update the points from placing roads
         }
-        //if both have the same weight, choose the one with the minimum forced colors
+        //if both have the same weight, choose the one that has the max points from roads placed,
+        // and if equal the one with the least forced colors
         if(dijk[city2].weight == (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
-            if(bord->MatRoute[city1][city2].color != 9){ // route has a set color
-                if(dijk[city2].color_forced < (dijk[city1].color_forced + bord->MatRoute[city1][city2].length)){
-                    dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
-                    dijk[city2].prev = city1;
-                    dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
+            if(dijk[city1].points_road+points(bord->MatRoute[city1][city2].length) > dijk[city2].points_road){
+                dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
+                dijk[city2].prev = city1;
+                dijk[city2].points_road = dijk[city1].points_road + points(bord->MatRoute[city1][city2].length);
+                if(bord->MatRoute[city1][city2].color != 9){ // route has a set color
+                    dijk[city2].color_forced =  dijk[city1].color_forced + bord->MatRoute[city1][city2].length;
                 }
-            }
-            else{ // route does not have a set color
-                if(dijk[city2].color_forced < dijk[city1].color_forced){
-                    dijk[city2].weight = dijk[city1].weight + bord->MatRoute[city1][city2].length;
-                    dijk[city2].prev = city1;
-                    dijk[city2].color_forced += bord->MatRoute[city1][city2].length;
-                }
+                else dijk[city2].color_forced = dijk[city1].color_forced;
             }
         }
     }
@@ -328,6 +327,7 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
          dijkstra[i].weight = __INT_MAX__;
          dijkstra[i].prev = -1;
          dijkstra[i].color_forced = 0;
+         dijkstra[i].points_road = 0;
     }
     dijkstra[city1].weight = 0;
 
@@ -776,7 +776,7 @@ float ev_calculate_result(Player_Info* info, To_Place* place, int obj_number_res
     float length = (float)place->nbwagons;
 
     if(length == 0) return (float)__INT_MAX__;
-    return (points_road+obj_points)/length;
+    return (points_road+2*obj_points)/length;
 }
 
 float max3(float val1, float val2, float val3, int index){
@@ -810,7 +810,7 @@ float ev_estimate_result(Player_Info* info, To_Place* place, int obj_number_resu
     float length = (float)place->length_est;
 
     if(length == 0) return (float)__INT_MAX__;
-    return (points_road+obj_points)/length;
+    return (points_road+2*obj_points)/length;
 }
 
 void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
@@ -875,13 +875,17 @@ void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord){
     // !! length_est is a bit risky. maybe nbwagons is safer
 
     // take the second best one if we have enough wagons (no check on EV_est value for now)
-    if(wagon_cpt - toplace_copy[max_ev_est]->length_est >= 8){
+    if(wagon_cpt - toplace_copy[max_ev_est]->length_est >= 8 &&
+        ev_estimate_result(info,toplace_copy[max_ev_est],max_ev_est)/(float)toplace_copy[max_ev]->nbwagons > 0.8 
+    ){
         info->movedata->chooseObjectives[max_ev_est] = 1;
         wagon_cpt -= toplace_copy[max_ev_est]->length_est;
     }
 
     // same for the third one
-    if(wagon_cpt - toplace_copy[max_ev^max_ev_est^3]->length_est >= 8){
+    if(wagon_cpt - toplace_copy[max_ev^max_ev_est^3]->length_est >= 8 &&
+        ev_estimate_result(info,toplace_copy[max_ev^max_ev_est^3],max_ev^max_ev_est^3)/(float)toplace_copy[max_ev]->nbwagons > 0.8 
+    ){
         info->movedata->chooseObjectives[max_ev^max_ev_est^3] = 1;
         wagon_cpt -= toplace_copy[max_ev^max_ev_est^3]->length_est;
     }
