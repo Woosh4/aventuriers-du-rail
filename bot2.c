@@ -25,7 +25,6 @@ void bot_2(Board* bord, Player_Info* info){
     int road = find_min_priority(bord, info, toplace, max_i);
     getBoardState(bord->cards_pickable);
     int choice = search_color_pick(bord, info, toplace, max_i, 0);
-    search_color_pick_v2(bord, info, toplace, max_i, 0); // !!!!!!!!!!!! for testing purposes
 
     //pick visible card
     if(choice >= 1 && choice <= 8){

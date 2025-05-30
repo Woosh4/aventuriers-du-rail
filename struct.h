@@ -54,4 +54,13 @@ typedef struct{
     int points_road; // how many points do we get from placing roads? for Dijkstra
     int prev; // previous city, to rebuild the path
 }Dijkstra_City;
+
+typedef struct{
+    int move; // place, pick random..
+    int city1;
+    int city2;
+    CardColor color;
+    int joker; // nb of joker needed
+}Action_order;
+
 #endif

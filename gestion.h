@@ -102,8 +102,8 @@ skip road if any color can be used, then comes back later:
 //5 pick random
  */
 int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
-int search_color_pick_v2(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
-
+/* v2 : pick the cards depending on the total we need, regardless of order*/
+Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** toplace, int pick);
 
 /* returns how many jokers are needed to place the road in toplace[max]->path[road] of specific color.
 color is to be between -11 and -18 for it work properly (convention used in search_color_pick)*/
@@ -138,4 +138,12 @@ float max3(float val1, float val2, float val3, int index);
 send a move 4, and prepares a move 5 (not sent)*/
 void pick_new_objectives(To_Place** toplace, Player_Info* info, Board* bord);
 
+/* searches the priority array for the given priority, and returns its position in the array*/
+int find_priority(Board* bord ,To_Place* place, int priority);
+
+/* fills up the move with the data in action. returns 1 if we play again*/
+int decode_action(Player_Info* info, Action_order* action);
+
+/* returns the index of the next maximum*/
+int find_next_max_color(int* col, int current_max);
 #endif

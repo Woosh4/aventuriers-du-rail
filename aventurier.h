@@ -3,3 +3,4 @@
 #include "gestion.h"
 #include "manual_play.h"
 #include "bot2.h"
+#include "bot3.h"
