@@ -11,7 +11,7 @@ void bot_3(Board* bord, Player_Info* info){
 
 
     //if no objectives left pick some more (not if gofast)
-    if(toplace[0] == NULL){
+    if(toplace[0] == NULL && !bord->gofast){
         pick_new_objectives(toplace, info, bord);
         
         sendMove(info->movedata,info->moveresult);
@@ -46,6 +46,8 @@ void bot_3(Board* bord, Player_Info* info){
         update_board(bord, info);
         update_player_info(info, bord);
     }
+
+    if(info->nbwagons <= 8) bord->gofast = 1; // GOFAST !!
 
     //cleanup
     destroy_toplace(toplace, info);

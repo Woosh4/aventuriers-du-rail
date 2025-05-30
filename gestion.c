@@ -359,7 +359,7 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
             toplace->points_place += points(bord->MatRoute[i][i+1].length);
             if(bord->MatRoute[dijkstra[city].prev][city].color != 9){ // if road has a color
                 toplace->col[bord->MatRoute[dijkstra[city].prev][city].color] += bord->MatRoute[dijkstra[city].prev][city].length; // add the length to the color count
-                if(bord->MatRoute[dijkstra[city].prev][city].color2 != 0){ // road also has a second color
+                if(bord->MatRoute[dijkstra[city].prev][city].color2 != 0 && bord->MatRoute[dijkstra[city].prev][city].color2 != 9){ // road also has a second color
                     toplace->col[bord->MatRoute[dijkstra[city].prev][city].color2] += bord->MatRoute[dijkstra[city].prev][city].length;
                 }
             }
@@ -601,19 +601,6 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
     action->joker = 0;
     action->move = -1;
 
-    // find all the colors we need and put them in col:
-    int col[10]; // should not be used after all
-    for(int j=0; j<10; j++) col[j]=0;
-    int i = 0;
-    while(toplace[i] != NULL){
-        for(int j=0; j<10; j++){
-            col[j] += toplace[i]->col[j];
-        }
-        i++;
-    }
-
-    if(info->nbwagons <= 8) bord->gofast = 1; // check if it is gofast time
-
     int pos_toplace = find_max_ev(toplace);
 
     while(pos_toplace != -1){ // check every To_place in the array, from highest to lowest EV
@@ -625,10 +612,8 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
             color1 = bord->MatRoute[city1][city2].color;
             color2 = bord->MatRoute[city1][city2].color2; // for convenience
 
-            if(bord->gofast); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-            if(color1 != 9){ // road has a color : try to place it !!!!!!!!!! check how many colors we need
-                if(!pick){
+            if(color1 != 9 && !pick){ // road has a color : try to place it !!!!!!!!!! check how many colors we need
+                if(color2 != 9 && color2 != 0){ // no color 2 : check only color1
                     // we have enough cards to place (check if enough wagons left as well)
                     if(info->cards[color1] >= bord->MatRoute[city1][city2].length &&
                     info->nbwagons >= bord->MatRoute[city1][city2].length){
@@ -639,12 +624,43 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
                         action->move = 1;
                         return action;
                     }
+                }
+                if(toplace[pos_toplace]->col[color1] >= toplace[pos_toplace]->col[color2]){ // if 2 colors: 1 is better
+                    if(info->cards[color1] >= bord->MatRoute[city1][city2].length &&
+                    info->nbwagons >= bord->MatRoute[city1][city2].length){ // we can place color1
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color1;
+                        action->joker = 0;
+                        action->move = 1;
+                        return action;
+                    }
                     // enough for color 2
-                    if(color2 != 9 && color2 != 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length &&
+                    if(info->cards[color2] >= bord->MatRoute[city1][city2].length &&
                     info->nbwagons >= bord->MatRoute[city1][city2].length){
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color2;
+                        action->joker = 0;
+                        action->move = 1;
+                        return action;
+                    }
+                }
+                else{ // color 2 is checked first
+                    if(info->cards[color2] >= bord->MatRoute[city1][city2].length &&
+                    info->nbwagons >= bord->MatRoute[city1][city2].length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color2;
+                        action->joker = 0;
+                        action->move = 1;
+                        return action;
+                    }
+                    if(info->cards[color1] >= bord->MatRoute[city1][city2].length &&
+                    info->nbwagons >= bord->MatRoute[city1][city2].length){ // we can place color1
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color1;
                         action->joker = 0;
                         action->move = 1;
                         return action;
@@ -655,7 +671,6 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
             if(color1 == 9 && !pick){ // road does not have a set color : try to place with card surplus
                 for(int j=1; j<9; j++){
                     if(((int)info->cards[j] - (int)toplace[pos_toplace]->col[j]) >= (int)bord->MatRoute[city1][city2].length){ // enough surplus : need-actual >= cost
-                        printf("%d superieur a : %d\n", info->cards[j] - toplace[pos_toplace]->col[j], bord->MatRoute[city1][city2].length);
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = j;
@@ -669,7 +684,7 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
             // could not place roads : try picking a visible card
             int col_max = 9999;
             for(int j=0; j<10; j++){
-                i = find_next_max_color(toplace[pos_toplace]->col, col_max); // used to store the max associated with the color we need the most
+                int i = find_next_max_color(toplace[pos_toplace]->col, col_max); // used to store the max associated with the color we need the most
                 col_max = toplace[pos_toplace]->col[i];
                 if(i!=0 && i!=9){ // if max color is not a joker or none :
                     for(int k=0; k<5; k++){ // check pickable cards
@@ -746,6 +761,78 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
     }
 
     // if we could not do any specific move (or a bug happened) pick a random card
+    if(!bord->gofast){
+        action->city1 = -1;
+        action->city2 = -1;
+        action->color = -1;
+        action->joker = 0;
+        action->move = 2;
+        return action;
+    }
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! put gofast before main loop ?
+    // gofast : the game is almost over ! instead of picking a random card, try to finish the game as fast as possible
+    // first, try to place a random road that is as long as possible (we start at nbwagons length : not optimised but avoids some bugs)
+    if(!pick){
+        for(int j=info->nbwagons; j>=0; j--){
+            for(int k=0; k<bord->gamedata->nbCities; k++){
+                for(int l=0; l<bord->gamedata->nbCities; l++){
+                    city1 = k;
+                    city2 = j;
+                    color1 = bord->MatRoute[city1][city2].color;
+                    color2 = bord->MatRoute[city1][city2].color2;
+
+                    if(bord->MatRoute[city1][city2].length == j){
+                        if(color1 != 9 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color1] >= bord->MatRoute[city1][city2].length){ // enough color 1 to place
+                            action->city1 = city1;
+                            action->city2 = city2;
+                            action->color = color1;
+                            action->joker = 0;
+                            action->move = 1;
+                            return action;
+                        }
+                        else if(color2 != 9 && color2 != 0 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length){ // enough color2 to place
+                            action->city1 = city1;
+                            action->city2 = city2;
+                            action->color = color2;
+                            action->joker = 0;
+                            action->move = 1;
+                            return action;
+                        }
+                        else if(color1 == 9){
+                            for(int k=1; k<9; k++){
+                                if(bord->MatRoute[city1][city2].taken < 0 && info->cards[k] >= bord->MatRoute[city1][city2].length){
+                                    action->city1 = city1;
+                                    action->city2 = city2;
+                                    action->color = k;
+                                    action->joker = 0;
+                                    action->move = 1;
+                                    return action;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // if we can't place, search a color to pick : take a color we already have (not perfect but will do)
+    int coolor = find_next_max_color((int*)info->cards, 999);
+    while(coolor != -1){
+        for(int k=0; k<5; k++){
+            if(bord->cards_pickable->card[k] == coolor){
+                action->city1 = -1;
+                action->city2 = -1;
+                action->color = coolor;
+                action->joker = 0;
+                action->move = 3;
+                return action;
+            }
+        }
+        coolor = find_next_max_color((int*)info->cards, info->cards[coolor]);
+    }
+    // if nothing was found pick random (should never happen)
     action->city1 = -1;
     action->city2 = -1;
     action->color = -1;
