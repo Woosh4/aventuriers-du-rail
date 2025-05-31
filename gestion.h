@@ -102,7 +102,7 @@ skip road if any color can be used, then comes back later:
 //5 pick random
  */
 int search_color_pick(Board* bord, Player_Info* info, To_Place** toplace, int max, int pick);
-/* v2 : pick the cards depending on the total we need, regardless of order*/
+/* v2 : pretty bad*/
 Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** toplace, int pick);
 
 /* returns how many jokers are needed to place the road in toplace[max]->path[road] of specific color.
@@ -146,4 +146,10 @@ int decode_action(Player_Info* info, Action_order* action);
 
 /* returns the index of the next maximum*/
 int find_next_max_color(CardColor* col, int current_max);
+
+Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick);
+
+
+
+
 #endif
