@@ -145,5 +145,5 @@ int find_priority(Board* bord ,To_Place* place, int priority);
 int decode_action(Player_Info* info, Action_order* action);
 
 /* returns the index of the next maximum*/
-int find_next_max_color(int* col, int current_max);
+int find_next_max_color(CardColor* col, int current_max);
 #endif

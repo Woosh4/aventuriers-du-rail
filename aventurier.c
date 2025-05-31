@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "aventurier.h"
 
 /* todo :
@@ -10,7 +11,7 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
 
-    int NBGAMES = 1; //number of games to play for the loop
+    int NBGAMES = 100; //number of games to play for the loop
     int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int PRINT_INFO = 1; // toggles debug prints
     int TOURNAMENT_TEST = 0;
@@ -34,8 +35,9 @@ int main(){
     //LOOP TO PLAY MULTIPLE GAMES
     for(int nbgame=0; nbgame<NBGAMES; nbgame++){
 
-    if(!TOURNAMENT_TEST) sendGameSettings("TRAINING NICE_BOT", board->gamedata);
-    else sendGameSettings("TOURNAMENT Test", board->gamedata);
+
+    if(TOURNAMENT_TEST) sendGameSettings("TOURNAMENT Test", board->gamedata);
+    else sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
     //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);

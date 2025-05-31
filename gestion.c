@@ -313,7 +313,7 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
     toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
     toplace->priority = malloc(bord->gamedata->nbCities * sizeof(int));
     for(int i=0; i<bord->gamedata->nbCities; i++) toplace->priority[i] = -1;
-    toplace->col = malloc(10* sizeof(int));
+    toplace->col = malloc(10* sizeof(CardColor));
     for(int i=0; i<10; i++) toplace->col[i] = 0;
     toplace->city1 = city1;
     toplace->city2 = city2;
@@ -818,7 +818,7 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
     }
 
     // if we can't place, search a color to pick : take a color we already have (not perfect but will do)
-    int coolor = find_next_max_color((int*)info->cards, 999);
+    int coolor = find_next_max_color(info->cards, 999);
     while(coolor != -1){
         for(int k=0; k<5; k++){
             if(bord->cards_pickable->card[k] == coolor){
@@ -830,7 +830,7 @@ Action_order* search_color_pick_v2(Board* bord, Player_Info* info, To_Place** to
                 return action;
             }
         }
-        coolor = find_next_max_color((int*)info->cards, info->cards[coolor]);
+        coolor = find_next_max_color(info->cards, info->cards[coolor]);
     }
     // if nothing was found pick random (should never happen)
     action->city1 = -1;
@@ -1138,7 +1138,7 @@ int find_priority(Board* bord ,To_Place* place, int priority){
     return -1;
 }
 
-int find_next_max_color(int* col, int current_max){
+int find_next_max_color(CardColor* col, int current_max){
     int pos_max;
     for(int i=0; i<10; i++){
         if(col[i] == current_max){
