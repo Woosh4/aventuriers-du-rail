@@ -37,7 +37,7 @@ int main(){
 
 
     if(TOURNAMENT_TEST) sendGameSettings("TOURNAMENT Test", board->gamedata);
-    else sendGameSettings("TRAINING NICE_BOT seed=16394346", board->gamedata);
+    else sendGameSettings("TRAINING NICE_BOT", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
     //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);
