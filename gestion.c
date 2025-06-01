@@ -1195,6 +1195,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
     int pos_toplace = find_max_ev(toplace); // position of max EV
     int priority = 0; // priority we are checking
     int pos_priority = find_priority(bord, toplace[pos_toplace], priority); //position of current priority
+    int max_surplus;
 
     while(pos_priority != -1){ // check all roads in the path
         city1 = toplace[pos_toplace]->path[2*pos_priority];
@@ -1203,10 +1204,12 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
         color2 = bord->MatRoute[city1][city2].color2;
         length = bord->MatRoute[city1][city2].length;
 
+        // // // // //
+
         if(color1 != 9){ // road does not have a set color
-            if(!pick && info->nbwagons >= length){ // not pick : try to place
-                if(color2 != 9 && color2 != 0){ // no second color : check for 1
-                    if(info->cards[color1] >= length){
+            if(!pick && info->nbwagons >= length){ // not pick : try to place (without jokers!)
+                if(color2 != 9 && color2 != 0){ // no second color : check for color1 only
+                    if((int)info->cards[color1] >= length){
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color1;
@@ -1215,9 +1218,9 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                         return action;
                     }
                 }
-                // there is a second color :
-                if(toplace[pos_toplace]->col[color1] >= toplace[pos_toplace]->col[color2]){ // need more of color1 : 2 first
-                    if(info->cards[color2] >= length){
+                // there is a second color : determine if we check color1 or color2 first
+                if((int)toplace[pos_toplace]->col[color1] >= (int)toplace[pos_toplace]->col[color2]){ // need more of color1 : 2 first
+                    if((int)info->cards[color2] >= length){
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color2;
@@ -1225,7 +1228,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                         action->move = 1;
                         return action;
                     }
-                    if(info->cards[color1] >= length){ // then check 1
+                    if((int)info->cards[color1] >= length){ // then check 1
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color1;
@@ -1235,7 +1238,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                     }
                 }
                 else{ // check 1 then 2
-                    if(info->cards[color1] >= length){ // 1
+                    if((int)info->cards[color1] >= length){ // 1
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color1;
@@ -1243,7 +1246,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                         action->move = 1;
                         return action;
                     }
-                    if(info->cards[color2] >= length){ // then 2
+                    if((int)info->cards[color2] >= length){ // then 2
                         action->city1 = city1;
                         action->city2 = city2;
                         action->color = color2;
@@ -1253,11 +1256,11 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                     }
                 }
             }
-            // could not place the colored road without jokers : try to pick a card
-            // need more of color1
+            // could not place the colored road without jokers : try to pick a card with the right color for the road
+            // need more of color1 (check 1 first then 2)
             if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] >= (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
                 for(int i=0; i<5; i++){
-                    if(bord->cards_pickable->card[i] == color1){
+                    if((int)bord->cards_pickable->card[i] == color1){
                         action->city1 = -1;
                         action->city2 = -1;
                         action->color = color1;
@@ -1267,7 +1270,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                     }
                 }
                 for(int i=0; i<5; i++){
-                    if(bord->cards_pickable->card[i] == color2){
+                    if((int)bord->cards_pickable->card[i] == color2){
                         action->city1 = -1;
                         action->city2 = -1;
                         action->color = color2;
@@ -1280,7 +1283,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
             // else check 2 first
             else{
                 for(int i=0; i<5; i++){
-                    if(bord->cards_pickable->card[i] == color2){
+                    if((int)bord->cards_pickable->card[i] == color2){
                         action->city1 = -1;
                         action->city2 = -1;
                         action->color = color2;
@@ -1290,7 +1293,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                     }
                 }
                 for(int i=0; i<5; i++){
-                    if(bord->cards_pickable->card[i] == color1){
+                    if((int)bord->cards_pickable->card[i] == color1){
                         action->city1 = -1;
                         action->city2 = -1;
                         action->color = color1;
@@ -1302,23 +1305,170 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
             }
         }
 
+        // // // // //
+
         // if the road does not have a set color
         if(color1 == 9){
-            // try to place it
+            // try to place it (without using a joker)
             if(!pick && info->nbwagons >= length){
-                // find the maximum surplus
+                // find the maximum surplus (= what we need - what we have)
+                max_surplus = -1;
+                for(int i=1; i<9; i++){
+                    if((int)info->cards[i] - (int)toplace[pos_toplace]->col[i] >= length && (int)info->cards[i] - (int)toplace[pos_toplace]->col[i] > max_surplus){ // enough surplus
+                        max_surplus = (int)info->cards[i] - (int)toplace[pos_toplace]->col[i];
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = i;
+                        action->joker = 0;
+                        action->move = 1;
+                    }
+                }
+                if(max_surplus > -1) return action; // found a way to place
             }
-            // else pick random ?
+            // else pick random (to change ?)
+            if(!bord->gofast){
+                action->city1 = -1;
+                action->city2 = -1;
+                action->color = -1;
+                action->joker = 0;
+                action->move = 2;
+                return action;
+            }
         }
+
+        // // // // //
+        // could not place the road or pick a satisfying card : try to place with some jokers
+
+        // try to place with a joker : if has a color, enough wagons remaining, and more cards than wagons (to not waste the jokers early)
+        if(color1 != 9 && !pick && info->nbwagons >= length && info->nbcards >= info->nbwagons){
+            if(color2 == 9 || color2 == 0){ // no second color
+                if((int)info->cards[color1] + (int)info->cards[9] >= length){
+                    action->city1 = city1;
+                    action->city2 = city2;
+                    action->color = color1;
+                    action->joker = length - (int)info->cards[color1];
+                    action->move = 1;
+                    return action;
+                }
+            }
+            else{ // there is a second color
+                // need more of color 1 : use jokers on color2
+                if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] >= (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
+                    // 2 first then 1
+                    if((int)info->cards[color2] + (int)info->cards[9] >= length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color2;
+                        action->joker = length - (int)info->cards[color2];
+                        action->move = 1;
+                        return action;
+                    }
+                    if((int)info->cards[color1] + (int)info->cards[9] >= length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color1;
+                        action->joker = length - (int)info->cards[color1];
+                        action->move = 1;
+                        return action;
+                    }
+                }
+                else{ // 1 then 2
+                    if((int)info->cards[color1] + (int)info->cards[9] >= length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color1;
+                        action->joker = length - (int)info->cards[color1];
+                        action->move = 1;
+                        return action;
+                    }
+                    if((int)info->cards[color2] + (int)info->cards[9] >= length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = color2;
+                        action->joker = length - (int)info->cards[color2];
+                        action->move = 1;
+                        return action;
+                    }
+                }
+            }
+        }
+
+        // // // // //
 
         if(bord->gofast){
             // place as fast as possible, else pick a card to place as fast as possible
+            if(!pick){
+                for(int j=info->nbwagons; j>=0; j--){
+                    for(int k=0; k<bord->gamedata->nbCities; k++){
+                        for(int l=0; l<bord->gamedata->nbCities; l++){
+                            city1 = k;
+                            city2 = j;
+                            color1 = bord->MatRoute[city1][city2].color;
+                            color2 = bord->MatRoute[city1][city2].color2;
+
+                            if(bord->MatRoute[city1][city2].length == j){
+                                if(color1 != 9 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color1] >= bord->MatRoute[city1][city2].length){ // enough color 1 to place
+                                    action->city1 = city1;
+                                    action->city2 = city2;
+                                    action->color = color1;
+                                    action->joker = 0;
+                                    action->move = 1;
+                                    return action;
+                                }
+                                else if(color2 != 9 && color2 != 0 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length){ // enough color2 to place
+                                    action->city1 = city1;
+                                    action->city2 = city2;
+                                    action->color = color2;
+                                    action->joker = 0;
+                                    action->move = 1;
+                                    return action;
+                                }
+                                else if(color1 == 9){
+                                    for(int k=1; k<9; k++){
+                                        if(bord->MatRoute[city1][city2].taken < 0 && info->cards[k] >= bord->MatRoute[city1][city2].length){
+                                            action->city1 = city1;
+                                            action->city2 = city2;
+                                            action->color = k;
+                                            action->joker = 0;
+                                            action->move = 1;
+                                            return action;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // if we can't place, search a color to pick : take the color of which we have the most. (if not available the second we have the most etc)
+            // we hope to place a road with no set color
+            int coolor = find_next_max_color(info->cards, 999);
+            while(coolor != -1){
+                for(int k=0; k<5; k++){
+                    if(bord->cards_pickable->card[k] == coolor){
+                        action->city1 = -1;
+                        action->city2 = -1;
+                        action->color = coolor;
+                        action->joker = 0;
+                        action->move = 3;
+                        return action;
+                    }
+                }
+                coolor = find_next_max_color(info->cards, info->cards[coolor]);
+            }
         }
 
         priority++;
         pos_priority = find_priority(bord, toplace[pos_toplace], priority); //position of current priority
     } // end of the loop for all roads in the path
 
+    // last resort : pick random
+    action->city1 = -1;
+    action->city2 = -1;
+    action->color = -1;
+    action->joker = 0;
+    action->move = 2;
+    return action;
 }
 
 

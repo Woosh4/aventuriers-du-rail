@@ -13,10 +13,10 @@ int main(){
 
     int NBGAMES = 1; //number of games to play for the loop
     int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
-    int PRINT_INFO = 1; // toggles debug prints
-    int TOURNAMENT_TEST = 0;
+    int PRINT_INFO = 1; // toggles debug prints (only for server prints : they slow down the program the most)
+    int TOURNAMENT_TEST = 0; // autoconnects to tournament Test, used to play against other players
 
-    int win_cpt = 0; // needed by PRINT_WINRATE_FILE
+    int win_cpt = 0; // needed by PRINT_WINRATE_FILE, counter of wins
     int lost_cpt = 0; // needed by PRINT_WINRATE_FILE
     if(!PRINT_INFO) DEBUG_LEVEL = NO_DEBUG;
 
@@ -37,7 +37,7 @@ int main(){
 
 
     if(TOURNAMENT_TEST) sendGameSettings("TOURNAMENT Test", board->gamedata);
-    else sendGameSettings("TRAINING NICE_BOT", board->gamedata);
+    else sendGameSettings("TRAINING NICE_BOT seed=16394346", board->gamedata);
     //ip 82.29.170.160 web:8889
     //sendGameSettings("TRAINING PLAY_RANDOM", board->gamedata);
     //sendGameSettings("TRAINING DO_NOTHING", board->gamedata);
@@ -82,7 +82,7 @@ int main(){
         //main loop body
         if(PRINT_INFO) printBoard();
         // bot_dumb1(board, info_p0);
-        bot_2(board, info_p0);
+        bot_3(board, info_p0);
         if(info_p0->moveresult->state) break;
 
         getMove(info_p1->movedata, info_p1->moveresult);
