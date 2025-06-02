@@ -49,7 +49,8 @@ typedef struct{
 
 typedef struct{
     int checked;
-    int weight; // nb of wagons from origin city
+    float weight; // weight calculated
+    int nb_wagons; // number of wagons from origin city
     int color_forced; // nb of wagons of a set color we are forced to use (i try to minimize it to gain speed during road placement)
     int points_road; // how many points do we get from placing roads? for Dijkstra
     int prev; // previous city, to rebuild the path

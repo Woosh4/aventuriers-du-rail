@@ -11,7 +11,7 @@ int main(){
     extern int DEBUG_LEVEL;
     DEBUG_LEVEL = INTERN_DEBUG;
 
-    int NBGAMES = 1; //number of games to play for the loop
+    int NBGAMES = 1000; //number of games to play for the loop
     int PRINT_WINRATE_FILE = 1; // to generate a file with : seed of current game, nbgames won, lost, winrate.
     int PRINT_INFO = 1; // toggles debug prints (only for server prints : they slow down the program the most)
     int TOURNAMENT_TEST = 0; // autoconnects to tournament Test, used to play against other players

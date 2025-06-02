@@ -277,7 +277,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     else if(bord->MatRoute[city1][city2].taken > 0){
         return;
     }
-    //route is free to take
+    //route is free to take and is shorter through city1
     else if(dijk[city2].weight >= (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
         // less wagons
         if(dijk[city2].weight > (dijk[city1].weight + bord->MatRoute[city1][city2].length)){
@@ -304,13 +304,39 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     return;
 }
 
+void update_weight_v2(Dijkstra_City* dijk, int city1, int city2, Board* bord){
+    //route taken by player
+    if(bord->MatRoute[city1][city2].taken == 0){
+        if(dijk[city2].weight > dijk[city1].weight){
+            dijk[city2].weight = dijk[city1].weight;
+            dijk[city2].prev = city1;
+            dijk[city2].color_forced = dijk[city1].color_forced;
+            dijk[city2].points_road = dijk[city1].points_road;
+            dijk[city2].nb_wagons = dijk[city1].nb_wagons;
+        }
+        return;
+    }
+    //route taken by opponent
+    else if(bord->MatRoute[city1][city2].taken > 0){
+        return;
+    }
+    //route is free to take and is faster through city 1
+    else if((float)dijk[city2].weight > ((float)(dijk[city1].nb_wagons+bord->MatRoute[city1][city2].length)/1+(float)(dijk[city1].points_road+points(bord->MatRoute[city1][city2].length)))){
+        dijk[city2].nb_wagons = dijk[city1].nb_wagons + bord->MatRoute[city1][city2].length;
+        dijk[city2].points_road = dijk[city1].points_road + points(bord->MatRoute[city1][city2].length);
+        dijk[city2].prev = city1;
+        dijk[city2].weight = (float)dijk[city2].nb_wagons / 1+((float)(dijk[city2].points_road));
+    }
+    return;
+}
+
 /* dikstra to find the shortest path between city1 and city2
 // IMPORTANT: add anti blocked for city 0 (of origin?)
 add how many roads are needed ? (for speed, optimising toplace* malloc space, building of the full road)*/
 To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
     int city;
     To_Place* toplace = malloc(sizeof(To_Place));
-    toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int)); // to be changed : too much allocated
+    toplace->path = malloc(bord->gamedata->nbCities * 2 * sizeof(int));
     toplace->priority = malloc(bord->gamedata->nbCities * sizeof(int));
     for(int i=0; i<bord->gamedata->nbCities; i++) toplace->priority[i] = -1;
     toplace->col = malloc(10* sizeof(CardColor));
@@ -324,10 +350,11 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
     Dijkstra_City* dijkstra = malloc(bord->gamedata->nbCities * sizeof(Dijkstra_City));
     for(int i=0; i<bord->gamedata->nbCities; i++){
          dijkstra[i].checked = 0;
-         dijkstra[i].weight = __INT_MAX__;
+         dijkstra[i].weight = __FLT_MAX__;
          dijkstra[i].prev = -1;
          dijkstra[i].color_forced = 0;
          dijkstra[i].points_road = 0;
+         dijkstra[i].nb_wagons = 0;
     }
     dijkstra[city1].weight = 0;
 
@@ -343,7 +370,7 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
         dijkstra[city].checked = 1;
         for(int i=0; i<bord->gamedata->nbCities; i++){
             if(bord->MatRoute[city][i].length > 0){
-                update_weight(dijkstra, city, i, bord);
+                update_weight_v2(dijkstra, city, i, bord);
             }
         }
     }
@@ -1422,7 +1449,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                 for(int k=0; k<bord->gamedata->nbCities; k++){
                     for(int l=0; l<bord->gamedata->nbCities; l++){
                         city1 = k;
-                        city2 = j;
+                        city2 = l;
                         color1 = bord->MatRoute[city1][city2].color;
                         color2 = bord->MatRoute[city1][city2].color2;
 
@@ -1486,5 +1513,8 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
     action->move = 2;
     return action;
 }
+
+
+
 
 

@@ -149,7 +149,9 @@ int find_next_max_color(CardColor* col, int current_max);
 
 Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick);
 
-
+/* V2 : maximise points / wagons instead of minimum wagons
+weight = nbwagons/(points_road + 2*points_objective)*/
+void update_weight_v2(Dijkstra_City* dijk, int city1, int city2, Board* bord);
 
 
 #endif
