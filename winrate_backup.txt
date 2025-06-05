@@ -22,3 +22,9 @@ SEED: 7036553, WON: 180, LOST:132, WINRATE: 57.692307 % bot3 v3 avec gofast
 SEED: 4248992, WON: 433, LOST:302, WINRATE: 58.911564 % bot3 v3 sans gofast
 SEED: 9558320, WON: 115, LOST:129, WINRATE: 47.131149 %
 SEED: 12517872, WON: 287, LOST:219, WINRATE: 56.719368 % avec, seed bug
+
+SEED: 7620909, WON: 173, LOST:130, WINRATE: 57.095711 % nouveau dijkstra avec gofast 
+SEED: 6271577, WON: 123, LOST:108, WINRATE: 53.246754 % 2 sans gofast
+avec gofast 2 sens 8, et dijk: verif all SEED: 10766206, WON: 154, LOST:123, WINRATE: 55.595669 %
+avec gofast 2 sens 8, deijk verif all 20points SEED: 12863206, WON: 133, LOST:89, WINRATE: 59.909908 %
+test max pick random : trshd = 10 : 

@@ -304,6 +304,7 @@ void update_weight(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     return;
 }
 
+/* wagons/points*/
 void update_weight_v2(Dijkstra_City* dijk, int city1, int city2, Board* bord){
     //route taken by player
     if(bord->MatRoute[city1][city2].taken == 0){
@@ -321,11 +322,11 @@ void update_weight_v2(Dijkstra_City* dijk, int city1, int city2, Board* bord){
         return;
     }
     //route is free to take and is faster through city 1
-    else if((float)dijk[city2].weight > ((float)(dijk[city1].nb_wagons+bord->MatRoute[city1][city2].length)/1+(float)(dijk[city1].points_road+points(bord->MatRoute[city1][city2].length)))){
+    else if((float)dijk[city2].weight > ((float)(dijk[city1].nb_wagons+bord->MatRoute[city1][city2].length)/20+(float)(dijk[city1].points_road+points(bord->MatRoute[city1][city2].length)))){
         dijk[city2].nb_wagons = dijk[city1].nb_wagons + bord->MatRoute[city1][city2].length;
         dijk[city2].points_road = dijk[city1].points_road + points(bord->MatRoute[city1][city2].length);
         dijk[city2].prev = city1;
-        dijk[city2].weight = (float)dijk[city2].nb_wagons / 1+((float)(dijk[city2].points_road));
+        dijk[city2].weight = (float)dijk[city2].nb_wagons / 20+((float)(dijk[city2].points_road));
     }
     return;
 }
@@ -370,7 +371,7 @@ To_Place* shortest(Board* bord, int city1, int city2, int* blocked){
         dijkstra[city].checked = 1;
         for(int i=0; i<bord->gamedata->nbCities; i++){
             if(bord->MatRoute[city][i].length > 0){
-                update_weight_v2(dijkstra, city, i, bord);
+                update_weight(dijkstra, city, i, bord);
             }
         }
     }
@@ -1287,64 +1288,75 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                 }
             }
             // could not place the colored road without jokers : try to pick a card with the right color for the road
-            // no color 2
-            if(color2 == 9 || color2 == 0){
-                for(int i=0; i<5; i++){
-                    if((int)bord->cards_pickable->card[i] == color1){
-                        action->city1 = -1;
-                        action->city2 = -1;
-                        action->color = color1;
-                        action->joker = 0;
-                        action->move = 3;
-                        return action;
+            // only if it is late enough in the game, else pick random
+            if(info->nbwagons - info->nbcards <= 10){
+                // no color 2
+                if(color2 == 9 || color2 == 0){
+                    for(int i=0; i<5; i++){
+                        if((int)bord->cards_pickable->card[i] == color1){
+                            action->city1 = -1;
+                            action->city2 = -1;
+                            action->color = color1;
+                            action->joker = 0;
+                            action->move = 3;
+                            return action;
+                        }
+                    }
+                }
+                // need more of color1 (check 1 first then 2)
+                else if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] >= (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
+                    for(int i=0; i<5; i++){
+                        if((int)bord->cards_pickable->card[i] == color1){
+                            action->city1 = -1;
+                            action->city2 = -1;
+                            action->color = color1;
+                            action->joker = 0;
+                            action->move = 3;
+                            return action;
+                        }
+                    }
+                    for(int i=0; i<5; i++){
+                        if((int)bord->cards_pickable->card[i] == color2){
+                            action->city1 = -1;
+                            action->city2 = -1;
+                            action->color = color2;
+                            action->joker = 0;
+                            action->move = 3;
+                            return action;
+                        }
+                    }
+                }
+                // else check 2 first
+                if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] < (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
+                    for(int i=0; i<5; i++){
+                        if((int)bord->cards_pickable->card[i] == color2){
+                            action->city1 = -1;
+                            action->city2 = -1;
+                            action->color = color2;
+                            action->joker = 0;
+                            action->move = 3;
+                            return action;
+                        }
+                    }
+                    for(int i=0; i<5; i++){
+                        if((int)bord->cards_pickable->card[i] == color1){
+                            action->city1 = -1;
+                            action->city2 = -1;
+                            action->color = color1;
+                            action->joker = 0;
+                            action->move = 3;
+                            return action;
+                        }
                     }
                 }
             }
-            // need more of color1 (check 1 first then 2)
-            else if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] >= (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
-                for(int i=0; i<5; i++){
-                    if((int)bord->cards_pickable->card[i] == color1){
-                        action->city1 = -1;
-                        action->city2 = -1;
-                        action->color = color1;
-                        action->joker = 0;
-                        action->move = 3;
-                        return action;
-                    }
-                }
-                for(int i=0; i<5; i++){
-                    if((int)bord->cards_pickable->card[i] == color2){
-                        action->city1 = -1;
-                        action->city2 = -1;
-                        action->color = color2;
-                        action->joker = 0;
-                        action->move = 3;
-                        return action;
-                    }
-                }
-            }
-            // else check 2 first
-            if((int)toplace[pos_toplace]->col[color1] - (int)info->cards[color1] < (int)toplace[pos_toplace]->col[color2] - (int)info->cards[color2]){
-                for(int i=0; i<5; i++){
-                    if((int)bord->cards_pickable->card[i] == color2){
-                        action->city1 = -1;
-                        action->city2 = -1;
-                        action->color = color2;
-                        action->joker = 0;
-                        action->move = 3;
-                        return action;
-                    }
-                }
-                for(int i=0; i<5; i++){
-                    if((int)bord->cards_pickable->card[i] == color1){
-                        action->city1 = -1;
-                        action->city2 = -1;
-                        action->color = color1;
-                        action->joker = 0;
-                        action->move = 3;
-                        return action;
-                    }
-                }
+            else{ // it is not late enough in the game : we prefer taking random cards for the hope of some jokers
+                action->city1 = -1;
+                action->city2 = -1;
+                action->color = -1;
+                action->joker = 0;
+                action->move = 2;
+                return action;
             }
         }
 

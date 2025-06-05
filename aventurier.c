@@ -82,7 +82,7 @@ int main(){
         //main loop body
         if(PRINT_INFO) printBoard();
         // bot_dumb1(board, info_p0);
-        bot_3(board, info_p0);
+        bot_3(board, info_p0, info_p1);
         if(info_p0->moveresult->state) break;
 
         getMove(info_p1->movedata, info_p1->moveresult);

@@ -1,7 +1,7 @@
 #include "bot3.h"
 #include <stdio.h>
 
-void bot_3(Board* bord, Player_Info* info){
+void bot_3(Board* bord, Player_Info* info, Player_Info* info_opponent){
     //beginning of the game
     //TODO IMPORTANT: have an array with all the colors needed to fill an objective ?, to pick cards effectively?
 
@@ -47,7 +47,7 @@ void bot_3(Board* bord, Player_Info* info){
         update_player_info(info, bord);
     }
 
-    if(info->nbwagons <= 8) bord->gofast = 1; // GOFAST !!
+    if(info->nbwagons <= 8 || info_opponent->nbwagons <= 8) bord->gofast = 1; // GOFAST !!
 
     //cleanup
     destroy_toplace(toplace, info);

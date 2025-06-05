@@ -5,5 +5,5 @@
 #define bot3_h
 
 
-void bot_3(Board* bord, Player_Info* info);
+void bot_3(Board* bord, Player_Info* info, Player_Info* info_opponent);
 #endif
