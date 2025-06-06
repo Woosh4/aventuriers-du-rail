@@ -22,7 +22,7 @@ void bot_3(Board* bord, Player_Info* info, Player_Info* info_opponent){
 
     update_priority(bord, info, toplace);
     getBoardState(bord->cards_pickable);
-    Action_order* action = search_color_pick_v3(bord, info, toplace, 0);
+    Action_order* action = search_color_pick_v3(bord, info, toplace, 0, info_opponent);
     replay = decode_action(info, action);
 
     //debug
@@ -35,7 +35,7 @@ void bot_3(Board* bord, Player_Info* info, Player_Info* info_opponent){
     getBoardState(bord->cards_pickable);
 
     if(replay){
-        action = search_color_pick_v3(bord, info, toplace, 1);
+        action = search_color_pick_v3(bord, info, toplace, 1, info_opponent);
         decode_action(info, action); // frees action
 
         //debug

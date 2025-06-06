@@ -80,7 +80,7 @@ void destroy_toplace(To_Place** toplace, Player_Info* info);
 void destroy_place(To_Place* place);
 
 /* updates priority in the toplace array for each road
-currently: roads with a set color first, the the others*/
+currently: all roads with a set color first, then the others. and within those 2 categories, the longest roads first*/
 void update_priority(Board* bord, Player_Info* info, To_Place** toplace);
 
 /* finds the index in toplace[max]->path of the road with the lowest priority*/
@@ -147,7 +147,7 @@ int decode_action(Player_Info* info, Action_order* action);
 /* returns the index of the next maximum*/
 int find_next_max_color(CardColor* col, int current_max);
 
-Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick);
+Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick, Player_Info* info_opp);
 
 /* V2 : maximise points / wagons instead of minimum wagons
 weight = nbwagons/(points_road + 2*points_objective)*/

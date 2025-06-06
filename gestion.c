@@ -477,20 +477,23 @@ void update_priority(Board* bord, Player_Info* info, To_Place** toplace){
     int priority;
     int j;
 
-    for(int i=0; i<20; i++){
+    for(int i=0; i<20; i++){ // for each path of the toplace array :
         j = 0;
         priority = 0;
         
         if(toplace[i] != NULL){
-            //search roads with a set color first
-            while(toplace[i]->path[j+1] != -1){
-                if(bord->MatRoute[toplace[i]->path[j]][toplace[i]->path[j+1]].color != 9){
-                    toplace[i]->priority[j/2] = priority;
-                    priority ++;
+            //search roads with a set color first, with highest length first (=6)
+            for(int l=6 ; l>0 ; l--){
+                while(toplace[i]->path[j+1] != -1){
+                    if(bord->MatRoute[toplace[i]->path[j]][toplace[i]->path[j+1]].color != 9 && bord->MatRoute[toplace[i]->path[j]][toplace[i]->path[j+1]].length == l){
+                        toplace[i]->priority[j/2] = priority;
+                        priority ++;
+                    }
+                    j = j+2;
                 }
-                j = j+2;
             }
-            //add the remaining roads (without a set color)
+
+            //add the remaining roads (without a set color) keeping the order. (more resilient if the opponent tries to block?)
             j = 0;
             while(toplace[i]->path[j+1] != -1){
                 if(toplace[i]->priority[j/2] == -1){
@@ -1208,7 +1211,7 @@ int decode_action(Player_Info* info, Action_order* action){
     return ret;
 }
 
-Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick){
+Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** toplace, int pick, Player_Info* info_opp){
     int city1;
     int city2;
     int color1;
@@ -1289,7 +1292,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
             }
             // could not place the colored road without jokers : try to pick a card with the right color for the road
             // only if it is late enough in the game, else pick random
-            if(info->nbwagons - info->nbcards <= 10){
+            if((info->nbwagons - info->nbcards <= 10 || info_opp->nbwagons < 15) && info->nbcards <= 48){
                 // no color 2
                 if(color2 == 9 || color2 == 0){
                     for(int i=0; i<5; i++){
@@ -1350,7 +1353,7 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
                     }
                 }
             }
-            else{ // it is not late enough in the game : we prefer taking random cards for the hope of some jokers
+            else if(info->nbcards <= 48){ // it is not late enough in the game : we prefer taking random cards for the hope of some jokers
                 action->city1 = -1;
                 action->city2 = -1;
                 action->color = -1;
@@ -1517,16 +1520,58 @@ Action_order* search_color_pick_v3(Board* bord, Player_Info* info, To_Place** to
         }
     }
 
-    // last resort : pick random
-    action->city1 = -1;
-    action->city2 = -1;
-    action->color = -1;
-    action->joker = 0;
-    action->move = 2;
-    return action;
+    // last resort (almost): pick random
+    if(info->nbcards <= 48 || (info->nbcards <= 49 && pick)){
+        action->city1 = -1;
+        action->city2 = -1;
+        action->color = -1;
+        action->joker = 0;
+        action->move = 2;
+        return action;
+    }
+
+    // very last resort : place a random road (we can't have more than 50 cards : this is the last thing we can do)
+    for(int j=0; j<bord->gamedata->nbCities; j++){
+        for(int k=0; k<bord->gamedata->nbCities; k++){
+            city1 = j;
+            city2 = k;
+            color1 = bord->MatRoute[city1][city2].color;
+            color2 = bord->MatRoute[city1][city2].color2;
+
+            if(color1 != 9 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color1] >= bord->MatRoute[city1][city2].length){ // enough color 1 to place
+                action->city1 = city1;
+                action->city2 = city2;
+                action->color = color1;
+                action->joker = 0;
+                action->move = 1;
+                return action;
+            }
+            else if(color2 != 9 && color2 != 0 && bord->MatRoute[city1][city2].taken < 0 && info->cards[color2] >= bord->MatRoute[city1][city2].length){ // enough color2 to place (and there is a color2)
+                action->city1 = city1;
+                action->city2 = city2;
+                action->color = color2;
+                action->joker = 0;
+                action->move = 1;
+                return action;
+            }
+            else if(color1 == 9){
+                for(int k=1; k<9; k++){
+                    if(bord->MatRoute[city1][city2].taken < 0 && info->cards[k] >= bord->MatRoute[city1][city2].length){
+                        action->city1 = city1;
+                        action->city2 = city2;
+                        action->color = k;
+                        action->joker = 0;
+                        action->move = 1;
+                        return action;
+                    }
+                }
+            }
+        }
+    }
+    for(int i=0; i<10; i++) printf("AAAAA\n");
+    printf("NOT GOOD : GOT TO THE END OF SEARCH_COLOR_PICK V3");
+    return NULL;
 }
-
-
 
 
 

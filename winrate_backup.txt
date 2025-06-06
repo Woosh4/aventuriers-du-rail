@@ -27,4 +27,15 @@ SEED: 7620909, WON: 173, LOST:130, WINRATE: 57.095711 % nouveau dijkstra avec go
 SEED: 6271577, WON: 123, LOST:108, WINRATE: 53.246754 % 2 sans gofast
 avec gofast 2 sens 8, et dijk: verif all SEED: 10766206, WON: 154, LOST:123, WINRATE: 55.595669 %
 avec gofast 2 sens 8, deijk verif all 20points SEED: 12863206, WON: 133, LOST:89, WINRATE: 59.909908 %
-test max pick random : trshd = 10 : 
+
+test max pick random : trshd = 10 : SEED: 13583256, WON: 373, LOST:145, WINRATE: 72.007721 %
+same but with upgraded priority : SEED: 14576591, WON: 143, LOST:60, WINRATE: 70.443352 %
+
+with dijkstra v2 : SEED: 1521232, WON: 98, LOST:105, WINRATE: 48.275864 %
+
+th = 5 : 1 SEED: 5310649, WON: 204, LOST:75, WINRATE: 73.118279 %
+th = 15 : 2 SEED: 16725978, WON: 191, LOST:81, WINRATE: 70.220589 %
+
+th 10 & opp 20 : SEED: 10100891, WON: 273, LOST:122, WINRATE: 69.113922 %
+SEED: 12360824, WON: 143, LOST:67, WINRATE: 68.095238 %
+10 15 final SEED: 5486238, WON: 530, LOST:235, WINRATE: 69.281044 %
